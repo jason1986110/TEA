@@ -1,2 +1,10 @@
 #!/usr/bin/env node
-console.log('hello world!')
+
+/*    understand/
+ * main entry point into our program
+ */
+function main() {
+  console.log('hello world!')
+}
+
+main()
