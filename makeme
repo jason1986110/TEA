@@ -35,7 +35,7 @@ function readreadme() {
  * all javascript files, ignoring .gitignore files
  */
 function xtractUserDocz() {
-  const docs = []
+  const docs = {}
 
   x_1('.')
   return docs
@@ -65,7 +65,8 @@ function xtractUserDocz() {
     lines.map(l => {
       const m = l.match(/\/\/\*\* ?(.*)/)
       if(!m) return
-      docs.push(m[1])
+      if(!docs[f]) docs[f] = []
+      docs[f].push(m[1])
     })
   }
 }
@@ -76,8 +77,12 @@ function xtractUserDocz() {
  */
 function checkAgainstReadme(readme, docs) {
   const lines = readme.split(/[\r\n]+/g).filter(l => l.trim())
-  const missing = docs.filter(l => l.trim()).filter(l => lines.indexOf(l) === -1)
-  if(missing.length) return missing
+  const missing = {}
+  for(let f in docs) {
+    const issing = docs[f].filter(l => l.trim()).filter(l => lines.indexOf(l) === -1)
+    if(issing && issing.length) missing[f] = issing
+  }
+  if(Object.keys(missing).length) return missing
 }
 
 function openPDF(readme) {
@@ -88,8 +93,11 @@ function openPDF(readme) {
  * show the missing lines
  */
 function display(readme, missing) {
-  console.log("README missing these lines:\n")
-  missing.map(l => console.log(l))
+  console.log("README missing these lines:")
+  for(let f in missing) {
+    console.log("\n" + f +":")
+    missing[f].map(l => console.log(l))
+  }
 }
 
 main()
