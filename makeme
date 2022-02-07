@@ -76,10 +76,14 @@ function xtractUserDocz() {
  * it is present in the readme, returning missing lines
  */
 function checkAgainstReadme(readme, docs) {
-  const lines = readme.split(/[\r\n]+/g).filter(l => l.trim())
+  const lines = readme.split(/\r\n|\n|\r/g)
   const missing = {}
   for(let f in docs) {
-    const issing = docs[f].filter(l => l.trim()).filter(l => lines.indexOf(l) === -1)
+    const issing = docs[f].filter(l => {
+      const ndx = lines.indexOf(l)
+      if(ndx === -1) return true
+      lines.splice(ndx, 1)
+    })
     if(issing && issing.length) missing[f] = issing
   }
   if(Object.keys(missing).length) return missing
