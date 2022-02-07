@@ -1,10 +1,9 @@
 {
-  "name": "makeme",
+  "name": "defg",
   "version": "1.0.0",
   "description": "Generate README.md from code documentation comments",
-  "main": "makeme",
   "bin": {
-    "makeme": "./makeme"
+    "defg": "./defg"
   },
   "keywords": [
     "docs",
