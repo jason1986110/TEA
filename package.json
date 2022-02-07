@@ -1,0 +1,19 @@
+{
+  "name": "makeme",
+  "version": "0.1.0",
+  "description": "Generate README.md from code documentation comments",
+  "main": "makeme",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "docs",
+    "documentation",
+    "README",
+    "markdown",
+    "pdf",
+    "literate-programming"
+  ],
+  "author": "charles.lobo@gmail.com",
+  "license": "ISC"
+}
