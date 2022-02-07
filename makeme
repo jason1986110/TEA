@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 const fs = require('fs')
+const path = require('path')
 
 /*    understand/
  * main entry point into our program
@@ -29,7 +30,44 @@ function readreadme() {
   }
 }
 
+/*    way/
+ * extract user documentation comment lines from
+ * all javascript files, ignoring .gitignore files
+ */
 function xtractUserDocz() {
+  const docs = []
+
+  x_1('.')
+  return docs
+
+  function x_1(p) {
+    const ntries = fs.readdirSync(p, { withFileTypes: true })
+    ntries.map(ntry => {
+      if(ntry.isDirectory() && is_ok_1(ntry.name)) return x_1(path.join(p, ntry.name))
+      if(!ntry.isFile()) return
+      if(ntry.name && ntry.name.endsWith(".js")) xtract_1(path.join(p, ntry.name))
+    })
+  }
+
+  function is_ok_1(n) {
+    if(!n) return
+    if(n === 'node_modules') return
+    if(n.startsWith('.')) return
+    if(n === 'dist') return
+    if(n === 'tmp' || n === '_tmp') return
+
+    return true
+  }
+
+  function xtract_1(f) {
+    const data = fs.readFileSync(f, "utf8")
+    const lines = data.split(/[\r\n]+/g)
+    lines.map(l => {
+      const m = l.match(/\/\/\*\* ?(.*)/)
+      if(!m) return
+      docs.push(m[1])
+    })
+  }
 }
 
 function checkAgainstReadme() {
