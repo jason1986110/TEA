@@ -2,9 +2,33 @@
 
 /*    understand/
  * main entry point into our program
+ *
+ *    way/
+ * find all user documentation comments and check them against
+ * the README.md. Display any not found or, if all found, open
+ * the README as pdf.
  */
 function main() {
-  console.log('hello world!')
+  const readme = readreadme()
+  const docs = xtractUserDocz()
+  const missing = checkAgainstReadme(readme, docs)
+  if(!missing) openPDF(readme)
+  else display(readme, missing)
+}
+
+function readreadme() {
+}
+
+function xtractUserDocz() {
+}
+
+function checkAgainstReadme() {
+}
+
+function openPDF() {
+}
+
+function display() {
 }
 
 main()
