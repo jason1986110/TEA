@@ -70,13 +70,26 @@ function xtractUserDocz() {
   }
 }
 
-function checkAgainstReadme() {
+/*    way/
+ * walk each documentation line and check that
+ * it is present in the readme, returning missing lines
+ */
+function checkAgainstReadme(readme, docs) {
+  const lines = readme.split(/[\r\n]+/g).filter(l => l.trim())
+  const missing = docs.filter(l => l.trim()).filter(l => lines.indexOf(l) === -1)
+  if(missing.length) return missing
 }
 
-function openPDF() {
+function openPDF(readme) {
+  console.log('opening pdf')
 }
 
-function display() {
+/*    way/
+ * show the missing lines
+ */
+function display(readme, missing) {
+  console.log("README missing these lines:\n")
+  missing.map(l => console.log(l))
 }
 
 main()
