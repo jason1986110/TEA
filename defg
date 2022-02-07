@@ -15,6 +15,7 @@ const { exec } = require('child_process')
 function main() {
   const readme = readreadme()
   const docs = xtractUserDocz()
+  if(!docs) return console.log("no documentation comments //** found")
   const missing = checkAgainstReadme(readme, docs)
   if(!missing) openPDF(readme)
   else display(readme, missing)
@@ -40,7 +41,7 @@ function xtractUserDocz() {
   const docs = {}
 
   x_1('.')
-  return docs
+  if(Object.keys(docs).length) return docs
 
   function x_1(p) {
     const ntries = fs.readdirSync(p, { withFileTypes: true })
