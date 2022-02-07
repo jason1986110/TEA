@@ -1,6 +1,6 @@
 {
   "name": "makeme",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Generate README.md from code documentation comments",
   "main": "makeme",
   "bin": {
