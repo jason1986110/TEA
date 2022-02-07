@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 const fs = require('fs')
 const path = require('path')
+const { mdToPdf } = require('md-to-pdf')
+const { exec } = require('child_process')
 
 /*    understand/
  * main entry point into our program
@@ -89,8 +91,25 @@ function checkAgainstReadme(readme, docs) {
   if(Object.keys(missing).length) return missing
 }
 
-function openPDF(readme) {
-  console.log('opening pdf')
+/*    way/
+ * generate and open pdf
+ */
+async function openPDF(readme) {
+  const dest = "./README.pdf"
+  await mdToPdf({ path: 'README.md' }, { dest }).catch(console.error)
+  openItem(dest)
+}
+
+/*    way/
+ * call the default open application based on platform
+ */
+function openItem(n) {
+  switch (process.platform) {
+    case 'darwin' : return exec('open ' + n)
+    case 'win32' : return exec('start ' + n)
+    case 'win64' : return exec('start ' + n)
+    default : return exec('xdg-open ' + n)
+  }
 }
 
 /*    way/

@@ -15,5 +15,8 @@
     "literate-programming"
   ],
   "author": "charles.lobo@gmail.com",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "md-to-pdf": "^5.1.0"
+  }
 }
