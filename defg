@@ -83,13 +83,31 @@ function checkAgainstReadme(readme, docs) {
   const missing = {}
   for(let f in docs) {
     const issing = docs[f].filter(l => {
+      if(l === '') return true
       const ndx = lines.indexOf(l)
       if(ndx === -1) return true
       lines.splice(ndx, 1)
     })
-    if(issing && issing.length) missing[f] = issing
+    const issin = strip_1(issing)
+    if(issin) missing[f] = issin
   }
   if(Object.keys(missing).length) return missing
+
+
+  /*    way/
+   * walk forward until the first non-blank line
+   * then walk until the last non-blank line
+   */
+  function strip_1(a) {
+    if(!a) return
+    let s = -1
+    let e = -1
+    for(let i = 0;i < a.length;i++) {
+      if(s == -1 && a[i] !== '') s = i
+      if(a[i] !== '') e = i+1
+    }
+    if(e > 0) return a.slice(s, e)
+  }
 }
 
 /*    way/
