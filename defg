@@ -18,6 +18,9 @@ function main() {
   const args = arg({
     '--help': Boolean,
     '--version': Boolean,
+    '--src': String,
+    '--readme': String,
+    '--pdf': String,
 
     '-h': '--help',
     '-v': '--version',
@@ -25,12 +28,18 @@ function main() {
   if(args['--help']) return showHelp()
   if(args['--version']) return showVersion()
 
-  const readme = readreadme()
-  const docs = xtractUserDocz()
+  const ctx = {
+    readme: args['--readme'] || 'README.md',
+    src: args['--src'] || '.',
+  }
+  ctx.pdf = args['--pdf'] || path.join(path.dirname(ctx.readme), path.basename(ctx.readme, '.md') + '.pdf')
+
+  const readme = readreadme(ctx)
+  const docs = xtractUserDocz(ctx)
   if(!docs) return console.log("no documentation comments //** found")
   const missing = checkAgainstReadme(readme, docs)
-  if(!missing) openPDF(readme)
-  else display(readme, missing)
+  if(!missing) openPDF(ctx)
+  else display(missing)
 }
 
 function showHelp() {
@@ -41,11 +50,11 @@ function showVersion() {
 }
 
 /*    way/
- * read the README.md file in the current directory
+ * safetly read the output readme file
  */
-function readreadme() {
+function readreadme(ctx) {
   try {
-    return fs.readFileSync('README.md', 'utf8')
+    return fs.readFileSync(ctx.readme, 'utf8')
   } catch(e) {
     if(e.code === 'ENOENT') return ""
     throw e
@@ -54,12 +63,14 @@ function readreadme() {
 
 /*    way/
  * extract user documentation comment lines from
- * all javascript files, ignoring .gitignore files
+ * all javascript files, ignoring some common directories (node_modules etc)
  */
-function xtractUserDocz() {
+function xtractUserDocz(ctx) {
   const docs = {}
 
-  x_1('.')
+  const stat = fs.lstatSync(ctx.src)
+  if(stat && stat.isFile()) xtract_1(ctx.src)
+  else x_1(ctx.src)
   if(Object.keys(docs).length) return docs
 
   function x_1(p) {
@@ -132,10 +143,9 @@ function checkAgainstReadme(readme, docs) {
 /*    way/
  * generate and open pdf
  */
-async function openPDF(readme) {
-  const dest = "./README.pdf"
-  await mdToPdf({ path: 'README.md' }, { dest }).catch(console.error)
-  openItem(dest)
+async function openPDF(ctx) {
+  await mdToPdf({ path: ctx.readme }, { dest: ctx.pdf }).catch(console.error)
+  openItem(ctx.pdf)
 }
 
 /*    way/
@@ -153,7 +163,7 @@ function openItem(n) {
 /*    way/
  * show the missing lines
  */
-function display(readme, missing) {
+function display(missing) {
   console.log("README missing these lines:")
   for(let f in missing) {
     console.log("\n" + f +":")
