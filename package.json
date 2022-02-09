@@ -1,6 +1,6 @@
 {
   "name": "defg",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "description": "Generate README.md from code documentation comments",
   "bin": {
     "defg": "./defg"
