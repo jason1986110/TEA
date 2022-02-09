@@ -3,6 +3,8 @@ const fs = require('fs')
 const path = require('path')
 const { mdToPdf } = require('md-to-pdf')
 const { exec } = require('child_process')
+const arg = require('arg')
+const { version } = require('./package.json')
 
 /*    understand/
  * main entry point into our program
@@ -13,12 +15,29 @@ const { exec } = require('child_process')
  * the README as pdf.
  */
 function main() {
+  const args = arg({
+    '--help': Boolean,
+    '--version': Boolean,
+
+    '-h': '--help',
+    '-v': '--version',
+  })
+  if(args['--help']) return showHelp()
+  if(args['--version']) return showVersion()
+
   const readme = readreadme()
   const docs = xtractUserDocz()
   if(!docs) return console.log("no documentation comments //** found")
   const missing = checkAgainstReadme(readme, docs)
   if(!missing) openPDF(readme)
   else display(readme, missing)
+}
+
+function showHelp() {
+  console.log(`defg: Generate README.md from code documentation`)
+}
+function showVersion() {
+  console.log(version)
 }
 
 /*    way/
