@@ -157,7 +157,10 @@ function checkAgainstReadme(readme, docs) {
  * generate and open pdf
  */
 async function openPDF(ctx) {
-  if(!fs.existsSync(ctx.readme)) return
+  if(!fs.existsSync(ctx.readme)) {
+    console.log(`${ctx.readme} not found to open!`)
+    return
+  }
   await mdToPdf({ path: ctx.readme }, { dest: ctx.pdf }).catch(console.error)
   openItem(ctx.pdf)
 }
