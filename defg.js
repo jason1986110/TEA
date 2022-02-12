@@ -21,9 +21,11 @@ function main() {
     '--src': String,
     '--readme': String,
     '--pdf': String,
+    '--ext': [ String ],
 
     '-h': '--help',
     '-v': '--version',
+    '-e': '--ext',
   })
   if(args['--help']) return showHelp()
   if(args['--version']) return showVersion()
@@ -31,7 +33,9 @@ function main() {
   const ctx = {
     readme: args['--readme'] || 'README.md',
     src: args['--src'] || '.',
+    exts: args['--ext'] || ['js,py,java,sql,ts,sh,go,c,cpp']
   }
+  ctx.exts = ctx.exts.join(',').split(',').map(e => '.' + e.trim())
   ctx.pdf = args['--pdf'] || path.join(path.dirname(ctx.readme), path.basename(ctx.readme, '.md') + '.pdf')
 
   const readme = readreadme(ctx)
@@ -82,7 +86,12 @@ function xtractUserDocz(ctx) {
     ntries.map(ntry => {
       if(ntry.isDirectory() && is_ok_1(ntry.name)) return x_1(path.join(p, ntry.name))
       if(!ntry.isFile()) return
-      if(ntry.name && ntry.name.endsWith(".js")) xtract_1(path.join(p, ntry.name))
+      if(!ntry.name) return
+      let m = false
+      ctx.exts.map(ext => {
+        if(ntry.name.endsWith(ext)) m = true
+      })
+      if(m) xtract_1(path.join(p, ntry.name))
     })
   }
 
