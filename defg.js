@@ -1,4 +1,42 @@
 #!/usr/bin/env node
+//** # DEFG - Generate documentation from code comments
+//**
+//** ## WHY!?
+//**
+//** I find that README's and other documentations tend to get out of
+//** date really _really_ quickly. The hope here is that documentation
+//** kept close to code should be easier to access, modify, and update.
+//**
+//** ## How does it work?
+//**
+//** `defg` trawls through all 'programming' files (.js, .sh, .java, .c, .cpp,...)
+//** it finds and extracts 'special' comments that start with //** - these are
+//** considered 'documentation' comments. It then checks that all the documentation
+//** lines are present in the README. If they are, it generates a nice PDF from
+//** and opens it.
+//**
+//** ## Why not just generate the PDF from the code documentation?
+//**
+//** Because when we write documentation in code file it's probably related to the
+//** code in the file. And such documentation can be distributed across multiple
+//** files. The actual user documentation has (a) a nice, defined, flow (ordering
+//** of the documentation pieces) and (b) could contain additional information that
+//** doesn't quite fit into a code file. All in all, having the documentation updated
+//** separately turns out to be better than trying to auto-generate it.
+//**
+//** ## Usage
+//** ```sh
+//** > defg
+//**   (looks for README.md and searches all code files in folders under this one recursively)
+//**
+//** Options
+//**    -h, --help:     show help
+//**    -v, --version:  show version
+//**    --src:          path of source files (or path of a single source file)
+//**    --readme:       path of README file to check (./README.md by default)
+//**    --pdf:          path of pdf generated (./README.pdf by default)
+//**    --ext:          list of valid source file extensions (js,py,java,sql,ts,sh,go,c,cpp by default)
+//** ```
 const fs = require('fs')
 const path = require('path')
 const { mdToPdf } = require('md-to-pdf')
