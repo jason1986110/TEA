@@ -37,7 +37,7 @@ function main() {
   const readme = readreadme(ctx)
   const docs = xtractUserDocz(ctx)
   if(!docs) {
-    console.log("no documentation comments //** found")
+    console.log("no documentation comments \/\/** found")
     openPDF(ctx)
     return
   }
@@ -47,7 +47,7 @@ function main() {
 }
 
 function showHelp() {
-  console.log(`defg: Generate README.md from code documentation (//** documentation comments)`)
+  console.log(`defg: Generate README.md from code documentation (\/\/** documentation comments)`)
 }
 function showVersion() {
   console.log(version)
