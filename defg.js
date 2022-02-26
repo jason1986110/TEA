@@ -152,10 +152,16 @@ function xtractUserDocz(ctx) {
     const data = fs.readFileSync(f, "utf8")
     const lines = data.split(/[\r\n]+/g)
     lines.map(l => {
-      const m = l.match(/\/\/\*\* ?(.*)/)
-      if(!m) return
+      let d
+      const e = l.match(/\/\/\*\* ?$/)
+      if(e) d = ""
+      else {
+        const m = l.match(/\/\/\*\* (.*)/)
+        if(!m) return
+        d = m[1]
+      }
       if(!docs[f]) docs[f] = []
-      docs[f].push(m[1])
+      docs[f].push(d)
     })
   }
 }
