@@ -94,7 +94,18 @@ function main() {
 }
 
 function showHelp() {
-  console.log(`defg: Generate README.md from code documentation (\/\/** documentation comments)`)
+  console.log(`$> defg
+  # ensures README contains all 'user documentation' comments (//** comments)
+  # and then generates and opens a PDF with the user documentation
+
+Options
+   -h, --help:     show help
+   -v, --version:  show version
+   --src:          path of source files (or path of a single source file)
+   --readme:       path of README file to check (./README.md by default)
+   --pdf:          path of pdf generated (./README.pdf by default)
+   --ext:          list of valid source file extensions (js,py,java,sql,ts,sh,go,c,cpp by default)
+`)
 }
 function showVersion() {
   console.log(version)
