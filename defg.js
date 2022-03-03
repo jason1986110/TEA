@@ -95,7 +95,7 @@ function main() {
 
 function showHelp() {
   console.log(`$> defg
-  # ensures README contains all 'user documentation' comments (//** comments)
+  # ensures README contains all 'user documentation' comments (${"//"}** comments)
   # and then generates and opens a PDF with the user documentation
 
 Options
