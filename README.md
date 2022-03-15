@@ -40,4 +40,5 @@ Options
    --readme:       path of README file to check (./README.md by default)
    --pdf:          path of pdf generated (./README.pdf by default)
    --ext:          list of valid source file extensions (js,py,java,sql,ts,sh,go,c,cpp by default)
+   --ignore-src:   ignore source and just generate from readme
 ```
