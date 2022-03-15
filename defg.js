@@ -112,7 +112,7 @@ function showVersion() {
 }
 
 /*    way/
- * safetly read the output readme file
+ * safely read the readme file
  */
 function readreadme(ctx) {
   try {
