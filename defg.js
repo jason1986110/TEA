@@ -66,6 +66,7 @@ function main() {
     '--readme': String,
     '--pdf': String,
     '--ext': [ String ],
+    '--ignore-src': Boolean,
 
     '-h': '--help',
     '-v': '--version',
@@ -83,15 +84,19 @@ function main() {
   ctx.pdf = args['--pdf'] || path.join(path.dirname(ctx.readme), path.basename(ctx.readme, '.md') + '.pdf')
 
   const readme = readreadme(ctx)
-  const docs = xtractUserDocz(ctx)
-  if(!docs) {
-    console.log("no documentation comments \/\/** found")
+  if(args['--ignore-src']) {
     openPDF(ctx)
-    return
+  } else {
+    const docs = xtractUserDocz(ctx)
+    if(!docs) {
+      console.log("no documentation comments \/\/** found")
+      openPDF(ctx)
+      return
+    }
+    const missing = checkAgainstReadme(readme, docs)
+    if(!missing) openPDF(ctx)
+    else display(missing)
   }
-  const missing = checkAgainstReadme(readme, docs)
-  if(!missing) openPDF(ctx)
-  else display(missing)
 }
 
 function showHelp() {
