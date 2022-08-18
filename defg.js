@@ -84,6 +84,9 @@ function main() {
   ctx.exts = ctx.exts.join(',').split(',').map(e => '.' + e.trim())
   ctx.pdf = args['--pdf'] || path.join(path.dirname(ctx.readme), path.basename(ctx.readme, '.md') + '.pdf')
 
+  if(args['--style']) ctx.style = args['--style']
+  else if(fs.existsSync("README.css")) ctx.style = "README.css"
+
   const readme = readreadme(ctx)
   if(args['--ignore-src']) {
     openPDF(ctx)
@@ -231,7 +234,9 @@ async function openPDF(ctx) {
     console.log(`${ctx.readme} not found to open!`)
     return
   }
-  await mdToPdf({ path: ctx.readme }, { dest: ctx.pdf }).catch(console.error)
+  const options = { dest: ctx.pdf }
+  if(ctx.style) options.stylesheet = ctx.style
+  await mdToPdf({ path: ctx.readme }, options).catch(console.error)
   openItem(ctx.pdf)
 }
 
