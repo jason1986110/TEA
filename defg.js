@@ -65,6 +65,7 @@ function main() {
     '--version': Boolean,
     '--src': String,
     '--readme': String,
+    '--style': String,
     '--pdf': String,
     '--ext': [ String ],
     '--ignore-src': Boolean,
