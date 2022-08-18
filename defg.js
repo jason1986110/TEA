@@ -171,10 +171,10 @@ function xtractUserDocz(ctx) {
     const lines = data.split(/[\r\n]+/g)
     lines.map(l => {
       let d
-      const e = l.match(/\/\/\*\* ?$/)
+      const e = l.match(/[/#][/#]\*\* ?$/)
       if(e) d = ""
       else {
-        const m = l.match(/\/\/\*\* (.*)/)
+        const m = l.match(/[/#][/#]\*\* (.*)/)
         if(!m) return
         d = m[1]
       }
