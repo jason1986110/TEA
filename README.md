@@ -1,5 +1,7 @@
 # DEFG - Generate documentation from code comments
 
+![logo](./icon.png)
+
 ## WHY!?
 
 I find that README's and other documentations tend to get out of
@@ -9,8 +11,8 @@ kept close to code should be easier to access, modify, and update.
 ## How does it work?
 
 `defg` trawls through all 'programming' files (.js, .sh, .java, .c, .cpp,...)
-it finds and extracts 'special' comments that start with `//**` - these are
-considered 'user documentation' comments. It then checks that all these
+it finds and extracts 'special' comments that start with `//**` or `##**` -
+these are considered 'user documentation' comments. It then checks that all these
 lines are present in the README. If they are, it generates a nice PDF from
 and opens it.
 
@@ -30,7 +32,7 @@ than trying to auto-generate it.
 ## Usage
 ```
 $> defg
-  # ensures README contains all 'user documentation' comments (//** comments)
+  # ensures README contains all 'user documentation' comments (//** or ##** comments)
   # and then generates and opens a PDF with the user documentation
 
 Options
@@ -42,3 +44,16 @@ Options
    --ext:          list of valid source file extensions (js,py,java,sql,ts,sh,go,c,cpp by default)
    --ignore-src:   ignore source and just generate from readme
 ```
+<style>
+body {
+  font-family: 'Helvetica', 'Georgia', 'Times New Roman', 'serif';
+}
+h1 {
+  text-align: center;
+}
+img {
+  width: 128px;
+  display: block;
+  margin: 16px auto;
+}
+</style>

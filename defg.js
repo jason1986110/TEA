@@ -10,8 +10,8 @@
 //** ## How does it work?
 //**
 //** `defg` trawls through all 'programming' files (.js, .sh, .java, .c, .cpp,...)
-//** it finds and extracts 'special' comments that start with `//**` - these are
-//** considered 'user documentation' comments. It then checks that all these
+//** it finds and extracts 'special' comments that start with `//**` or `##**` -
+//** these are considered 'user documentation' comments. It then checks that all these
 //** lines are present in the README. If they are, it generates a nice PDF from
 //** and opens it.
 //**
@@ -31,7 +31,7 @@
 //** ## Usage
 //** ```
 //** $> defg
-//**   # ensures README contains all 'user documentation' comments (//** comments)
+//**   # ensures README contains all 'user documentation' comments (//** or ##** comments)
 //**   # and then generates and opens a PDF with the user documentation
 //**
 //** Options
@@ -89,7 +89,8 @@ function main() {
   } else {
     const docs = xtractUserDocz(ctx)
     if(!docs) {
-      console.log("no documentation comments \/\/** found")
+      console.log("No documentation comments found...")
+      console.log("Documentation comments are single line comments that start with \/\/** or \#\#**")
       openPDF(ctx)
       return
     }
@@ -101,7 +102,7 @@ function main() {
 
 function showHelp() {
   console.log(`$> defg
-  # ensures README contains all 'user documentation' comments (${"//"}** comments)
+  # ensures README contains all 'user documentation' comments (${"//"}** or ${"##"}** comments)
   # and then generates and opens a PDF with the user documentation
 
 Options
