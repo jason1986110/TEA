@@ -45,16 +45,3 @@ Options
    --ext:          list of valid source file extensions (js,py,java,sql,ts,sh,go,c,cpp by default)
    --ignore-src:   ignore source and just generate from readme
 ```
-<style>
-body {
-  font-family: 'Helvetica', 'Georgia', 'Times New Roman', 'serif';
-}
-h1 {
-  text-align: center;
-}
-img {
-  width: 128px;
-  display: block;
-  margin: 16px auto;
-}
-</style>
