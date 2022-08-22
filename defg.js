@@ -99,8 +99,9 @@ function main() {
       openPDF(ctx)
       return
     }
-    const missing = checkAgainstReadme(readme, docs)
-    if(!missing) openPDF(ctx)
+    const missing = checkAgainstReadme(readme == null ? "" : readme, docs)
+    if(missing && readme == null) generateReadme(ctx, docs);
+    else if(!missing) openPDF(ctx)
     else display(missing)
   }
 }
@@ -132,7 +133,7 @@ function readreadme(ctx) {
   try {
     return fs.readFileSync(ctx.readme, 'utf8')
   } catch(e) {
-    if(e.code === 'ENOENT') return ""
+    if(e.code === 'ENOENT') return null
     throw e
   }
 }
@@ -225,6 +226,17 @@ function checkAgainstReadme(readme, docs) {
     }
     if(e > 0) return a.slice(s, e)
   }
+}
+
+function generateReadme(ctx, docs_) {
+  let docs = ""
+  for(let f in docs_) {
+    docs += "\n" + docs_[f].join("\n");
+  }
+  fs.writeFile(ctx.readme, docs, err => {
+    if(err) console.error(err)
+    else openPDF(ctx);
+  })
 }
 
 /*    way/
