@@ -129,11 +129,6 @@ function regen_readme(ctx, readme, docs) {
 
 }
 
-function fl_dist(v1, v2) {
-  const dist = fl.distance(v1, v2);
-  return dist / Math.min(v1.length, v2.length) + " " + dist + " v1:" + JSON.stringify(v1.substring(0,8)) + ' v2:' + JSON.stringify(v2.substring(0,8));
-}
-
 function showHelp() {
   console.log(`$> defg
   # ensures README contains all 'user documentation' comments (${"//"}** or ${"##"}** comments)
@@ -220,42 +215,6 @@ function xtractUserDocz(ctx) {
   }
 }
 
-/*    way/
- * walk each documentation line and check that
- * it is present in the readme, returning missing lines
- */
-function checkAgainstReadme(readme, docs) {
-  const lines = readme.split(/\r\n|\n|\r/g)
-  const missing = {}
-  for(let f in docs) {
-    const issing = docs[f].filter(l => {
-      if(l === '') return true
-      const ndx = lines.indexOf(l)
-      if(ndx === -1) return true
-      lines.splice(ndx, 1)
-    })
-    const issin = strip_1(issing)
-    if(issin) missing[f] = issin
-  }
-  if(Object.keys(missing).length) return missing
-
-
-  /*    way/
-   * walk forward until the first non-blank line
-   * then walk until the last non-blank line
-   */
-  function strip_1(a) {
-    if(!a) return
-    let s = -1
-    let e = -1
-    for(let i = 0;i < a.length;i++) {
-      if(s == -1 && a[i] !== '') s = i
-      if(a[i] !== '') e = i+1
-    }
-    if(e > 0) return a.slice(s, e)
-  }
-}
-
 function saveReadme(ctx, data) {
   fs.writeFile(ctx.readme, data, err => {
     if(err) console.error(err)
@@ -294,17 +253,6 @@ function openItem(n) {
     case 'win32' : return exec('start ' + n)
     case 'win64' : return exec('start ' + n)
     default : return exec('xdg-open ' + n)
-  }
-}
-
-/*    way/
- * show the missing lines
- */
-function display(missing) {
-  console.log("README missing these lines:")
-  for(let f in missing) {
-    console.log("\n" + f +":")
-    missing[f].map(l => console.log(l))
   }
 }
 
