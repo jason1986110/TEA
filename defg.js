@@ -51,6 +51,8 @@ const { exec } = require('child_process')
 const arg = require('arg')
 const { version } = require('./package.json')
 
+const Diff = require('diff')
+
 /*    understand/
  * main entry point into our program
  *
@@ -99,11 +101,37 @@ function main() {
       openPDF(ctx)
       return
     }
-    const missing = checkAgainstReadme(readme == null ? "" : readme, docs)
-    if(missing && readme == null) generateReadme(ctx, docs);
-    else if(!missing) openPDF(ctx)
-    else display(missing)
+
+    regen_readme(ctx, readme, docs)
   }
+}
+
+function regen_readme(ctx, readme, docs) {
+  const o = []
+  const d = asStr(docs)
+
+  if(readme == null) {
+    saveReadme(ctx, d)
+  } else {
+    const diff = Diff.diffLines(readme, d, { ignoreWhitespace: false, newlineIsToken: false })
+
+    for(let i = 0;i < diff.length;i++) {
+      const part = diff[i]
+      if(part.removed) {
+        if(part.value.match(/[!]\[.*\](.*)/)) o.push(part.value)
+      } else {
+        o.push(part.value);
+      }
+    }
+    const data = o.join("").trim()
+    saveReadme(ctx, data)
+  }
+
+}
+
+function fl_dist(v1, v2) {
+  const dist = fl.distance(v1, v2);
+  return dist / Math.min(v1.length, v2.length) + " " + dist + " v1:" + JSON.stringify(v1.substring(0,8)) + ' v2:' + JSON.stringify(v2.substring(0,8));
 }
 
 function showHelp() {
@@ -176,7 +204,7 @@ function xtractUserDocz(ctx) {
 
   function xtract_1(f) {
     const data = fs.readFileSync(f, "utf8")
-    const lines = data.split(/[\r\n]+/g)
+    const lines = data.split(/[\r\n]/g)
     lines.map(l => {
       let d
       const e = l.match(/[/#][/#]\*\* ?$/)
@@ -228,15 +256,19 @@ function checkAgainstReadme(readme, docs) {
   }
 }
 
-function generateReadme(ctx, docs_) {
+function saveReadme(ctx, data) {
+  fs.writeFile(ctx.readme, data, err => {
+    if(err) console.error(err)
+    else openPDF(ctx);
+  })
+}
+
+function asStr(docs_) {
   let docs = ""
   for(let f in docs_) {
     docs += "\n" + docs_[f].join("\n");
   }
-  fs.writeFile(ctx.readme, docs, err => {
-    if(err) console.error(err)
-    else openPDF(ctx);
-  })
+  return docs
 }
 
 /*    way/
