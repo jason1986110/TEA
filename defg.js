@@ -112,10 +112,13 @@ function main() {
 }
 
 function asDiff(docblocks) {
-  return docblocks.map(value => {
-    value += "\n"
-    return { added: true, value }
+  let diff = []
+  docblocks.map(block => {
+    diff = diff.concat(block.map(value => {
+      return { added: true, value }
+    }))
   })
+  return diff
 }
 
 /*    way/
