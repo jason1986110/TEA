@@ -103,11 +103,18 @@ function main() {
     }
 
     if(readme == null) {
-      saveReadme(ctx, asStr(docblocks))
+      saveReadme(ctx, asDiff(docblocks))
     } else {
       regen_readme(ctx, readme, docblocks)
     }
   }
+}
+
+function asDiff(docblocks) {
+  return docblocks.map(value => {
+    value += "\n"
+    return { added: true, value }
+  })
 }
 
 /*    way/
