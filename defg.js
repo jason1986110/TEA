@@ -285,15 +285,15 @@ function xtractUserDocz(ctx) {
    * re-arranged.
    * Eg:
    *   file1.js:
-   *      //** comment1
-   *      //** comment1
+   *      comment1
+   *      comment1
    *      ...
-   *      //** comment2
-   *      //** comment2
+   *      comment2
+   *      comment2
    *   file2.js:
    *      ...
-   *      //** comment3
-   *      //** comment3
+   *      comment3
+   *      comment3
    *
    * will be extracted as:
    *    [
