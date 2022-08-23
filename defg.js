@@ -115,8 +115,8 @@ function asDiff(docblocks) {
   let diff = []
   docblocks.map(block => {
     diff = diff.concat(block.map(value => {
-      return { added: true, value }
       value += "\n"
+      return { fresh: true, value }
     }))
   })
   return diff
@@ -345,13 +345,16 @@ function saveReadme(ctx, diff) {
   const o = []
   for(let i = 0;i < diff.length;i++) {
     const part = diff[i]
-    if(part.removed) {
-      console.log(chalk.red(part.value))
+    if(part.fresh) {
+      console.log(chalk.magenta(part.value.trim()))
+      o.push(part.value);
+    } else if(part.removed) {
+      console.log(chalk.red('xxx '+part.value.trim()+' xxx'))
     } else if(part.added) {
-      console.log(chalk.blue(part.value))
+      console.log(chalk.blue(part.value.trim()))
       o.push(part.value);
     } else {
-      console.log(chalk.grey(part.value))
+      console.log(chalk.grey(part.value.trim()))
       o.push(part.value);
     }
   }
