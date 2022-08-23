@@ -94,40 +94,116 @@ function main() {
   if(args['--ignore-src']) {
     openPDF(ctx)
   } else {
-    const docs = xtractUserDocz(ctx)
-    if(!docs) {
+    const docblocks = xtractUserDocz(ctx)
+    if(!docblocks) {
       console.log("No documentation comments found...")
       console.log("Documentation comments are single line comments that start with \/\/** or \#\#**")
       openPDF(ctx)
       return
     }
 
-    regen_readme(ctx, readme, docs)
-  }
-}
-
-function regen_readme(ctx, readme, docs) {
-  const o = []
-  const d = asStr(docs)
-
-  if(readme == null) {
-    saveReadme(ctx, d)
-  } else {
-    const diff = Diff.diffLines(readme, d, { ignoreWhitespace: false, newlineIsToken: false })
-
-    for(let i = 0;i < diff.length;i++) {
-      const part = diff[i]
-      if(part.removed) {
-        if(part.value.match(/[!]\[.*\](.*)/)) o.push(part.value)
-      } else {
-        o.push(part.value);
-      }
+    if(readme == null) {
+      saveReadme(ctx, asStr(docblocks))
+    } else {
+      regen_readme(ctx, readme, docblocks)
     }
-    const data = o.join("").trim()
-    saveReadme(ctx, data)
+  }
+}
+
+/*    way/
+ * Find the closest of all permutations of the docblocks
+ * and apply that to the README, trying to preserve images already
+ * in the README.
+ */
+function regen_readme(ctx, readme, docblocks) {
+  const n = docblocks.length
+  const chosen = []
+  const perm = []
+  const dists = []
+
+  const rlines = readme.split(/[\r\n]/g)
+
+  const min = { dist: null, data: null }
+  gen_1(find_min_1)
+
+  const data = min.data.join("\n").trim()
+  const diff = Diff.diffLines(readme, data, { ignoreWhitespace: false, newlineIsToken: false })
+
+  saveReadme(ctx, diff)
+
+  function gen_1(cb) {
+    if(perm.length == n) return cb()
+    for(let i = 0;i < n;i++) {
+      if(chosen[i]) continue;
+      chosen[i] = true
+      perm.push(docblocks[i])
+      gen_1(cb)
+      perm.pop()
+      chosen[i] = false
+    }
   }
 
+  /*    way/
+   * walk both data and readme in lockstep, inserting special lines from the README into non-matching
+   * data (looking 'n' lines ahead for a reasonable match)
+   */
+  function find_min_1() {
+    let data = []
+    perm.map(block => data = data.concat(block))
+    let nd = 0
+    let nr = 0
+    let dist = 0
+    while(nd < data.length && nr < rlines.length) {
+      const ld = data[nd]
+      const lr = rlines[nr]
+      if(ld === lr) {
+        nd++
+        nr++
+        continue
+      }
+      if(!ld || isSplLine(ld)) {
+        nd++
+        continue
+      }
+      if(!lr || isSplLine(lr)) {
+        nr++
+        data.splice(nd, 0, lr)
+        nd++
+        continue
+      }
+      const maxLookAhead = 7
+      let i = 1;
+      for(;i < maxLookAhead;i++) {
+        const ld_ = data[nd+i]
+        const lr_ = rlines[nr+i]
+        if(lr_ === ld) {
+          dist += i
+          nr += i
+          break
+        }
+        if(ld_ === lr) {
+          dist += i
+          nd += i
+          break
+        }
+      }
+      if(i == maxLookAhead) {
+        dist += 2
+      }
+      nd++
+      nr++
+      if(min.dist != null && dist > min.dist) return
+    }
+    dists.push(dist)
+    min.dist = dist
+    min.data = data
+  }
 }
+
+function isSplLine(l) {
+  return l.match(/^[ \t]*[!]\[.*\]\([^)]*\)[ \t\n]*$/) || l.match(/^[ \t]*<.*>[ \t\n]*$/)
+}
+
 
 function showHelp() {
   console.log(`$> defg
@@ -154,7 +230,7 @@ function showVersion() {
  */
 function readreadme(ctx) {
   try {
-    return fs.readFileSync(ctx.readme, 'utf8')
+    return fs.readFileSync(ctx.readme, 'utf8').trim()
   } catch(e) {
     if(e.code === 'ENOENT') return null
     throw e
@@ -166,12 +242,12 @@ function readreadme(ctx) {
  * all javascript files, ignoring some common directories (node_modules etc)
  */
 function xtractUserDocz(ctx) {
-  const docs = {}
+  const docblocks = []
 
   const stat = fs.lstatSync(ctx.src)
-  if(stat && stat.isFile()) xtract_1(ctx.src)
+  if(stat && stat.isFile()) xtract_1(ctx.src, docblocks)
   else x_1(ctx.src)
-  if(Object.keys(docs).length) return docs
+  if(docblocks.length) return docblocks
 
   function x_1(p) {
     const ntries = fs.readdirSync(p, { withFileTypes: true })
@@ -183,7 +259,7 @@ function xtractUserDocz(ctx) {
       ctx.exts.map(ext => {
         if(ntry.name.endsWith(ext)) m = true
       })
-      if(m) xtract_1(path.join(p, ntry.name))
+      if(m) xtract_1(path.join(p, ntry.name), docblocks)
     })
   }
 
@@ -197,37 +273,81 @@ function xtractUserDocz(ctx) {
     return true
   }
 
-  function xtract_1(f) {
+  /*    understand/
+   * extract all the comments in files in blocks so they can be
+   * re-arranged.
+   * Eg:
+   *   file1.js:
+   *      //** comment1
+   *      //** comment1
+   *      ...
+   *      //** comment2
+   *      //** comment2
+   *   file2.js:
+   *      ...
+   *      //** comment3
+   *      //** comment3
+   *
+   * will be extracted as:
+   *    [
+   *      ["comment1", "comment1"],
+   *      ["comment2", "comment2"],
+   *      ["comment3", "comment3"],
+   *    ]
+   *
+   *      way/
+   * Add each documentation line to an active docblock list, closing the
+   * existing active list whenever we find a non-documentation
+   * line and creating a new one when needed.
+   */
+  function xtract_1(f, docblocks) {
+    let active = null
+
     const data = fs.readFileSync(f, "utf8")
     const lines = data.split(/[\r\n]/g)
     lines.map(l => {
-      let d
-      const e = l.match(/[/#][/#]\*\* ?$/)
-      if(e) d = ""
-      else {
-        const m = l.match(/[/#][/#]\*\* (.*)/)
-        if(!m) return
-        d = m[1]
+      const doc = xtract_doc_comment_1(l)
+      if(doc === null) {
+        active = null
+      } else {
+        if(!active) {
+          active = []
+          docblocks.push(active)
+        }
+        active.push(doc)
       }
-      if(!docs[f]) docs[f] = []
-      docs[f].push(d)
     })
+  }
+
+  function xtract_doc_comment_1(l) {
+    let m
+    m = l.match(/[/#][/#]\*\* ?$/)
+    if(m) return ""
+    m = l.match(/[/#][/#]\*\* (.*)/)
+    if(m) return m[1]
+    return null
   }
 }
 
-function saveReadme(ctx, data) {
+function saveReadme(ctx, diff) {
+  const o = []
+  for(let i = 0;i < diff.length;i++) {
+    const part = diff[i]
+    if(part.removed) {
+      console.log("- " + part.value);
+    } else if(part.added) {
+      console.log("+ " + part.value);
+      o.push(part.value);
+    } else {
+      console.log("==" + part.value);
+      o.push(part.value);
+    }
+  }
+  const data = o.join("").trim()
   fs.writeFile(ctx.readme, data, err => {
     if(err) console.error(err)
     else openPDF(ctx);
   })
-}
-
-function asStr(docs_) {
-  let docs = ""
-  for(let f in docs_) {
-    docs += "\n" + docs_[f].join("\n");
-  }
-  return docs
 }
 
 /*    way/
