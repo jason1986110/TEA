@@ -7,7 +7,6 @@
 I find that README's and other documentations tend to get out of
 date quickly. Using `defg` you can simply generate your README
 from documentation comments, and as these comments are close
-
 to the code, they are be easier to access, modify, and update.
 
 It still takes some discipline to update - instead of ignoring -
