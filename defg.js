@@ -116,6 +116,7 @@ function asDiff(docblocks) {
   docblocks.map(block => {
     diff = diff.concat(block.map(value => {
       return { added: true, value }
+      value += "\n"
     }))
   })
   return diff
