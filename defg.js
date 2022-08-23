@@ -52,6 +52,7 @@ const arg = require('arg')
 const { version } = require('./package.json')
 
 const Diff = require('diff')
+const chalk = require('chalk')
 
 /*    understand/
  * main entry point into our program
@@ -341,12 +342,12 @@ function saveReadme(ctx, diff) {
   for(let i = 0;i < diff.length;i++) {
     const part = diff[i]
     if(part.removed) {
-      console.log("- " + part.value);
+      console.log(chalk.red(part.value))
     } else if(part.added) {
-      console.log("+ " + part.value);
+      console.log(chalk.blue(part.value))
       o.push(part.value);
     } else {
-      console.log("==" + part.value);
+      console.log(chalk.grey(part.value))
       o.push(part.value);
     }
   }
