@@ -73,3 +73,147 @@
 //** This algorithm has the advantage that (a) it can work with partial permutations and resume them as we needed, (b)
 //** it can incorporate all $Sp$ lines by simply recognizing them during the and, (c) it can exit very early in the cycle
 //** thus trimming the tree effectively.
+
+function regen(ctx, readme, docblocks) {
+  const n = docblocks.length
+
+  const chosen = []
+  const perm = []
+
+  const rlines = readme.split(/[\r\n]/g)
+
+  const min = { dist: null, perm: null }
+  gen_1(0, 0, 0)
+
+  let data = []
+  min.perm.map(block => data = data.concat(block))
+  const r = find_dist_1(data, rlines, 0, 0, 0, true)
+  const res = r.data.join("\n").trim()
+
+  return res
+
+  function gen_1(nd, nr, curr_dist) {
+    for(let i = 0;i < n;i++) {
+      if(chosen[i]) continue;
+
+      chosen[i] = true
+      perm.push(docblocks[i])
+      let data = []
+      perm.map(block => data = data.concat(block))
+
+      const r = find_dist_1(data, rlines, nd, nr, curr_dist)
+      if(r) {
+        if(perm.length == n) {
+          min.perm = [...perm]
+          min.dist = r.dist
+        } else {
+          gen_1(r.nd, r.nr, r.dist)
+        }
+      }
+
+      perm.pop()
+      chosen[i] = false
+    }
+  }
+
+  /*    way/
+   * walk both data and readme in lockstep, inserting special lines from the README into non-matching
+   * data (looking 'n' lines ahead for a reasonable match), and skipping `insert-block` inserted text
+   * and recording all the changed lines as the distance between the files.
+   */
+  function find_dist_1(data, rlines, nd, nr, curr_dist, insert) {
+    let dist = curr_dist
+    let inSkipBlock = false
+    while(nd < data.length && nr < rlines.length) {
+      const ld = data[nd]
+      const lr = rlines[nr]
+
+      if(inSkipBlock) {
+        nr++
+        if(insert) {
+          data.splice(nd, 0, lr)
+          nd++
+        }
+        if(isEndDiv(lr)) inSkipBlock = false
+        continue
+      }
+      if(lr && isSkipDiv(lr)) {
+        inSkipBlock = true;
+        continue;
+      }
+
+      if(ld === lr) {
+        nd++
+        nr++
+        continue
+      }
+      if(!ld) {
+        nd++
+        continue
+      }
+      if(!lr || isSplLine(lr)) {
+        nr++
+        if(insert) {
+          data.splice(nd, 0, lr)
+          nd++
+        }
+        continue
+      }
+      const maxLookAhead = 7
+      let i = 1;
+      for(;i < maxLookAhead;i++) {
+        const ld_ = data[nd+i]
+        const lr_ = rlines[nr+i]
+        if(lr_ === ld) {
+          dist += i
+          nr += i
+          break
+        }
+        if(ld_ === lr) {
+          dist += i
+          nd += i
+          break
+        }
+      }
+      if(i == maxLookAhead) {
+        dist += 2
+      }
+      nd++
+      nr++
+      if(min.dist != null && dist > min.dist) return
+    }
+    if(insert) {
+      while(nr < rlines.length) {
+        const lr = rlines[nr++]
+        if(inSkipBlock) {
+          data.push(lr)
+          nd++
+          if(isEndDiv(lr)) inSkipBlock = false
+          continue
+        }
+        if(lr && isSkipDiv(lr)) {
+          data.push(lr)
+          nd++
+          inSkipBlock = true
+          continue;
+        }
+        if(!lr || isSplLine(lr)) {
+          data.push(lr)
+          nd++
+          continue
+        }
+        break
+      }
+    }
+    return { nd, nr, dist, data }
+  }
+}
+
+function isEndDiv(l) { return l.match(/^<\/div>[ \t]*$/); }
+function isSkipDiv(l) { return l.match(/^<div  *class=.*insert-block.*>[ \t]*$/); }
+
+function isSplLine(l) {
+  return l.match(/^[ \t]*[!]\[.*\]\([^)]*\)[ \t\n]*$/) || l.match(/^[ \t]*<.*>[ \t\n]*$/)
+}
+
+module.exports = regen

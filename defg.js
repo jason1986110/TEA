@@ -81,6 +81,8 @@ const chalk = require('chalk')
 
 const matter = require('gray-matter')
 
+const regen = require('./regen.js')
+
 /*    understand/
  * main entry point into our program
  *
@@ -150,136 +152,6 @@ function asDiff(docblocks) {
   })
   return diff
 }
-
-/*    way/
- * Find the closest of all permutations of the docblocks
- * and apply that to the README, trying to preserve images already
- * in the README.
- */
-function regen_readme(ctx, readme, docblocks) {
-  const n = docblocks.length
-  console.log('n', n)
-  const chosen = []
-  const perm = []
-
-  const rlines = readme.split(/[\r\n]/g)
-
-  const min = { dist: null, data: null }
-  gen_1(find_min_1)
-
-  const data = min.data.join("\n").trim()
-  const diff = Diff.diffLines(readme, data, { ignoreWhitespace: false, newlineIsToken: false })
-
-  saveReadme(ctx, diff)
-
-  function gen_1(cb) {
-    if(perm.length == n) return cb()
-    for(let i = 0;i < n;i++) {
-      if(chosen[i]) continue;
-      chosen[i] = true
-      perm.push(docblocks[i])
-      gen_1(cb)
-      perm.pop()
-      chosen[i] = false
-    }
-  }
-
-  /*    way/
-   * walk both data and readme in lockstep, inserting special lines from the README into non-matching
-   * data (looking 'n' lines ahead for a reasonable match), and skipping `insert-block` inserted text
-   * and recording all the changed lines as the distance between the files.
-   */
-  function find_min_1() {
-    let data = []
-    perm.map(block => data = data.concat(block))
-    let nd = 0
-    let nr = 0
-    let dist = 0
-    let inSkipBlock = false
-    while(nd < data.length && nr < rlines.length) {
-      const ld = data[nd]
-      const lr = rlines[nr]
-
-      if(inSkipBlock) {
-        nr++
-        data.splice(nd, 0, lr)
-        nd++
-        if(isEndDiv(lr)) inSkipBlock = false
-        continue
-      }
-      if(lr && isSkipDiv(lr)) {
-        inSkipBlock = true;
-        continue;
-      }
-
-      if(ld === lr) {
-        nd++
-        nr++
-        continue
-      }
-      if(!ld) {
-        nd++
-        continue
-      }
-      if(!lr || isSplLine(lr)) {
-        nr++
-        data.splice(nd, 0, lr)
-        nd++
-        continue
-      }
-      const maxLookAhead = 7
-      let i = 1;
-      for(;i < maxLookAhead;i++) {
-        const ld_ = data[nd+i]
-        const lr_ = rlines[nr+i]
-        if(lr_ === ld) {
-          dist += i
-          nr += i
-          break
-        }
-        if(ld_ === lr) {
-          dist += i
-          nd += i
-          break
-        }
-      }
-      if(i == maxLookAhead) {
-        dist += 2
-      }
-      nd++
-      nr++
-      if(min.dist != null && dist > min.dist) return
-    }
-    while(nr < rlines.length) {
-      const lr = rlines[nr++]
-      if(inSkipBlock) {
-        data.push(lr)
-        if(isEndDiv(lr)) inSkipBlock = false
-        continue
-      }
-      if(lr && isSkipDiv(lr)) {
-        data.push(lr)
-        inSkipBlock = true
-        continue;
-      }
-      if(!lr || isSplLine(lr)) {
-        data.push(lr)
-        continue
-      }
-      break
-    }
-    min.dist = dist
-    min.data = data
-  }
-}
-
-function isEndDiv(l) { return l.match(/^<\/div>[ \t]*$/); }
-function isSkipDiv(l) { return l.match(/^<div  *class=.*insert-block.*>[ \t]*$/); }
-
-function isSplLine(l) {
-  return l.match(/^[ \t]*[!]\[.*\]\([^)]*\)[ \t\n]*$/) || l.match(/^[ \t]*<.*>[ \t\n]*$/)
-}
-
 
 function showHelp() {
   console.log(`$> defg
@@ -504,6 +376,12 @@ async function openPDF(ctx) {
   if(created) fs.unlinkSync(mathjax)
 
   openItem(ctx.pdf)
+}
+
+function regen_readme(ctx, readme, docblocks) {
+  const data = regen(ctx, readme, docblocks)
+  const diff = Diff.diffLines(readme, data, { ignoreWhitespace: false, newlineIsToken: false })
+  saveReadme(ctx, diff)
 }
 
 /*    way/
