@@ -1,33 +1,19 @@
 #!/usr/bin/env node
-//** # DEFG - Generate documentation from code comments
+//** # DEFG - Beautiful Documentation from Code Comments
 //**
 //** ## Motivation
 //**
 //** I find that README's and other documentations tend to get out of
-//** date quickly. Using `defg` you can simply generate your README
-//** from documentation comments, and as these comments are close
+//** date quickly. `defg` generates a README from documentation
+//** comments, and as these comments are close
 //** to the code, they are be easier to access, modify, and update.
-//**
-//** It still takes some discipline to update - instead of ignoring -
-//** the documentation comments, but it's easier to do as you are
-//** changing/reviewing the code.
 //**
 //** ## How does it work?
 //**
 //** `defg` trawls through all 'programming' files (.js, .sh, .java, .c, .cpp,...)
 //** it finds and extracts 'special' comments that start with `//**` or `##**`.
-//** These are considered 'user documentation' comments. It then uses them to
-//** update the README, generates a nice PDF, and opens it.
-//**
-//** ## Why not just generate the PDF from the code documentation?
-//**
-//** Because when we write documentation in code file it should be related to the
-//** code in the file. This documentation may be distributed across multiple
-//** files - close to classes and functions.
-//**
-//** The actual user documentation will have (a) a nice, defined, flow (ordering
-//** of the documentation pieces) and (b) additional images, html etc, that may not
-//** quite fit into a specific code file.
+//** These are considered 'user documentation' comments in markdown.
+//** It then uses them to update the README, generate a nice PDF, and opens it.
 //**
 //** ## First Run
 //**
@@ -36,10 +22,51 @@
 //** of comments all mixed up. You are encouraged to then go and reorder all the
 //** pieces in the README.md to get it into a nice shape.
 //**
-//** ## Adding Images
+//** ## Improving the README
 //**
-//** In order to make your documentation prettier, you can chose to include images
-//** etc. If you do this, `defg` will attempt to preserve these in the updated README.
+//** You can also update your README to make it more readable. You can:
+//**
+//** 1. Add pictures.
+//** 2. Add styling.
+//** 3. Add text.
+//** 4. Configure the page layout.
+//**
+//** As you do all these, `defg` will preserve your changes whenever it updates your README.
+//**
+//** ### HOW TO IMPROVE THE README
+//**
+//** - You can add images in markdown or using the `<img..` tag. Similarily,
+//**   you can add other HTML styling in the document to improve it's look.
+//**
+//** - For better control on your styling you can add a README.css which will
+//**   apply the CSS styles to your README while generating the PDF.
+//**
+//** - To insert additional text in the README, wrap the additional text
+//**   in a `<div class="insert-block">...</div>`.
+//**
+//** - To insert a page break insert a `<div class="page-break" />` and add the style to your CSS:
+//**   ```css
+//**   .page-break {
+//**     page-break-after: always
+//**   }
+//**
+//** - To design the page layout, create a `pages.defg` file. Here you can decide the page
+//**   size, header & footer using the following Puppeteer options: https://pptr.dev/api/puppeteer.pdfoptions
+//**   ```
+//**   format: A4
+//**   margin: 20mm 20mm
+//**   printBackground: true
+//**   headerTemplate: |-
+//**     <div class="header">
+//**        Document header
+//**     </div>
+//**   footerTemplate: |-
+//**     <div class="footer">
+//**         Page <span class="pageNumber"></span>
+//**         of <span class="totalPages"></span>
+//**     </div>
+//**   ```
+//**
 //**
 //** ## Usage
 //** ```
