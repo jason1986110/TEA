@@ -185,7 +185,8 @@ function regen_readme(ctx, readme, docblocks) {
 
   /*    way/
    * walk both data and readme in lockstep, inserting special lines from the README into non-matching
-   * data (looking 'n' lines ahead for a reasonable match), and skipping `insert-block` inserted text.
+   * data (looking 'n' lines ahead for a reasonable match), and skipping `insert-block` inserted text
+   * and recording all the changed lines as the distance between the files.
    */
   function find_min_1() {
     let data = []
@@ -247,6 +248,24 @@ function regen_readme(ctx, readme, docblocks) {
       nd++
       nr++
       if(min.dist != null && dist > min.dist) return
+    }
+    while(nr < rlines.length) {
+      const lr = rlines[nr++]
+      if(inSkipBlock) {
+        data.push(lr)
+        if(isEndDiv(lr)) inSkipBlock = false
+        continue
+      }
+      if(lr && isSkipDiv(lr)) {
+        data.push(lr)
+        inSkipBlock = true
+        continue;
+      }
+      if(!lr || isSplLine(lr)) {
+        data.push(lr)
+        continue
+      }
+      break
     }
     min.dist = dist
     min.data = data
