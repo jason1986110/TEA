@@ -36,7 +36,7 @@ As you do all these, `defg` will preserve your changes whenever it updates your 
 
 <div class="page-break"></div>
 
-<div style="background:#C4A997;padding:2em;margin:2em 4em;border:1px solid #AD876E;border-radius:6px;">
+<div style="background:#C4A997;padding:1em 3em 3em 1em;margin:2em 4em;border:1px solid #AD876E;border-radius:6px;">
 
 ### HOW TO IMPROVE THE README
 
