@@ -64,28 +64,37 @@ As you do all these, `defg` will preserve your changes whenever it updates your 
   format: A4
   margin: 20mm 20mm
   printBackground: true
-
   headerTemplate: |-
+    <style>
+      .header, .footer {
+        width: calc(100% - 30mm);
+        margin: 0 auto;
+        text-align: left;
+        font-family: system-ui;
+        font-size: 6px;
+        padding: 4px;
+      }
+      .header {
+        border-bottom: 1px solid #333;
+      }
+      .footer {
+        border-top: 1px solid #333;
+        text-align: center;
+      }
+      .date {
+        display: block;
+        float: right;
+      }
+    </style>
     <div class="header">
-      <div class="header">
-    <div class="header">
-  <div class="header">
-       Document header
+       <span>My Document</span>
+       <span class="date"></span>
     </div>
-      </div>
-    </div>
-  </div>
   footerTemplate: |-
     <div class="footer">
-      <div class="footer">
-    <div class="footer">
-  <div class="footer">
         Page <span class="pageNumber"></span>
         of <span class="totalPages"></span>
     </div>
-      </div>
-    </div>
-  </div>
   ```
 
 

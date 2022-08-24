@@ -57,8 +57,30 @@
 //**   margin: 20mm 20mm
 //**   printBackground: true
 //**   headerTemplate: |-
+//**     <style>
+//**       .header, .footer {
+//**         width: calc(100% - 30mm);
+//**         margin: 0 auto;
+//**         text-align: left;
+//**         font-family: system-ui;
+//**         font-size: 6px;
+//**         padding: 4px;
+//**       }
+//**       .header {
+//**         border-bottom: 1px solid #333;
+//**       }
+//**       .footer {
+//**         border-top: 1px solid #333;
+//**         text-align: center;
+//**       }
+//**       .date {
+//**         display: block;
+//**         float: right;
+//**       }
+//**     </style>
 //**     <div class="header">
-//**        Document header
+//**        <span>My Document</span>
+//**        <span class="date"></span>
 //**     </div>
 //**   footerTemplate: |-
 //**     <div class="footer">
@@ -94,6 +116,8 @@ const { version } = require('./package.json')
 const Diff = require('diff')
 const chalk = require('chalk')
 
+const matter = require('gray-matter')
+
 /*    understand/
  * main entry point into our program
  *
@@ -123,7 +147,8 @@ function main() {
   const ctx = {
     readme: args['--readme'] || 'README.md',
     src: args['--src'] || '.',
-    exts: args['--ext'] || ['js,py,java,sql,ts,sh,go,c,cpp']
+    exts: args['--ext'] || ['js,py,java,sql,ts,sh,go,c,cpp'],
+    page_options: 'page.defg',
   }
   ctx.exts = ctx.exts.join(',').split(',').map(e => '.' + e.trim())
   ctx.pdf = args['--pdf'] || path.join(path.dirname(ctx.readme), path.basename(ctx.readme, '.md') + '.pdf')
@@ -277,10 +302,40 @@ function showVersion() {
   console.log(version)
 }
 
+function readreadme(ctx) { return readsafely(ctx.readme); }
+
+function readpageoptions(ctx) {
+  let page_options = readsafely(ctx.page_options);
+  if(!page_options) return
+
+  if(!page_options.match(/^[ \t]/)) {
+    page_options = page_options.split(/[\r\n]/g).map(l => '  ' + l).join("\n");
+  }
+
+  const front = matter(`---
+${page_options}
+---
+  `)
+
+  if(front) return front.data
+}
+
+/*    way/
+ * safely read a file
+ */
+function readsafely(f) {
+  try {
+    return fs.readFileSync(f, 'utf8').trim()
+  } catch(e) {
+    if(e.code === 'ENOENT') return null
+    throw e
+  }
+}
+
 /*    way/
  * safely read the readme file
  */
-function readreadme(ctx) {
+function read(ctx) {
   try {
     return fs.readFileSync(ctx.readme, 'utf8').trim()
   } catch(e) {
@@ -413,9 +468,17 @@ async function openPDF(ctx) {
     console.log(`${ctx.readme} not found to open!`)
     return
   }
+
+  const readme = readreadme(ctx)
+  const page_options = readpageoptions(ctx)
+
   const options = { dest: ctx.pdf }
   if(ctx.style) options.stylesheet = ctx.style
+  if(page_options) options.pdf_options = page_options
+  options.pdf_options.displayHeaderFooter = true
+
   await mdToPdf({ path: ctx.readme }, options).catch(console.error)
+
   openItem(ctx.pdf)
 }
 
