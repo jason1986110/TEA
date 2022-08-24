@@ -222,7 +222,7 @@ function regen_readme(ctx, readme, docblocks) {
 
   /*    way/
    * walk both data and readme in lockstep, inserting special lines from the README into non-matching
-   * data (looking 'n' lines ahead for a reasonable match)
+   * data (looking 'n' lines ahead for a reasonable match), and skipping `insert-block` inserted text.
    */
   function find_min_1() {
     let data = []
@@ -230,15 +230,29 @@ function regen_readme(ctx, readme, docblocks) {
     let nd = 0
     let nr = 0
     let dist = 0
+    let inSkipBlock = false
     while(nd < data.length && nr < rlines.length) {
       const ld = data[nd]
       const lr = rlines[nr]
+
+      if(inSkipBlock) {
+        nr++
+        data.splice(nd, 0, lr)
+        nd++
+        if(isEndDiv(lr)) inSkipBlock = false
+        continue
+      }
+      if(lr && isSkipDiv(lr)) {
+        inSkipBlock = true;
+        continue;
+      }
+
       if(ld === lr) {
         nd++
         nr++
         continue
       }
-      if(!ld || isSplLine(ld)) {
+      if(!ld) {
         nd++
         continue
       }
@@ -276,6 +290,9 @@ function regen_readme(ctx, readme, docblocks) {
     min.data = data
   }
 }
+
+function isEndDiv(l) { return l.match(/^<\/div>[ \t]*$/); }
+function isSkipDiv(l) { return l.match(/^<div  *class=.*insert-block.*>[ \t]*$/); }
 
 function isSplLine(l) {
   return l.match(/^[ \t]*[!]\[.*\]\([^)]*\)[ \t\n]*$/) || l.match(/^[ \t]*<.*>[ \t\n]*$/)
