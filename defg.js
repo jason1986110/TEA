@@ -160,7 +160,6 @@ function regen_readme(ctx, readme, docblocks) {
   const n = docblocks.length
   const chosen = []
   const perm = []
-  const dists = []
 
   const rlines = readme.split(/[\r\n]/g)
 
@@ -249,7 +248,6 @@ function regen_readme(ctx, readme, docblocks) {
       nr++
       if(min.dist != null && dist > min.dist) return
     }
-    dists.push(dist)
     min.dist = dist
     min.data = data
   }
