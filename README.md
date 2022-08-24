@@ -60,42 +60,34 @@ As you do all these, `defg` will preserve your changes whenever it updates your 
 - To design the page layout, create a `pages.defg` file. Here you can decide the page
   size, header & footer using the following Puppeteer options: https://pptr.dev/api/puppeteer.pdfoptions
 
-  ```
-  format: A4
-  margin: 20mm 20mm
-  printBackground: true
-  headerTemplate: |-
-    <style>
-      .header, .footer {
-        width: calc(100% - 30mm);
-        margin: 0 auto;
-        text-align: left;
-        font-family: system-ui;
-        font-size: 6px;
-        padding: 4px;
-      }
-      .header {
-        border-bottom: 1px solid #333;
-      }
-      .footer {
-        border-top: 1px solid #333;
-        text-align: center;
-      }
-      .date {
-        display: block;
-        float: right;
-      }
-    </style>
-    <div class="header">
-       <span>My Document</span>
-       <span class="date"></span>
+<div class="insert-block" style="margin-left:2.2em">
+  <h4>Sample</h4>
+  <div style="background:white;border-radius:4px;">
+  <code style="white-space:pre">
+    format: A4
+    margin: 20mm 20mm
+    headerTemplate: |-
+      &lt;style&gt;
+        .header, .footer {
+          font-family: system-ui;
+          font-size: 6px;
+        }
+        .header {
+          border-bottom: 1px solid #333;
+        }
+      &lt;/style&gt;
+      &lt;div class="header"&gt;
+         &lt;span&gt;My Document&lt;/span&gt;
+         &lt;span class="date"&gt;&lt;/span&gt;
+      &lt;/div&gt;
+    footerTemplate: |-
+      &lt;div class="footer"&gt;
+          Page &lt;span class="pageNumber"&gt;&lt;/span&gt;
+          of &lt;span class="totalPages"&gt;&lt;/span&gt;
+      &lt;/div&gt;
+    </code>
     </div>
-  footerTemplate: |-
-    <div class="footer">
-        Page <span class="pageNumber"></span>
-        of <span class="totalPages"></span>
-    </div>
-  ```
+</div>
 
 
 </div>
