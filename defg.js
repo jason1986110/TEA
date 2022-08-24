@@ -112,6 +112,7 @@ function main() {
     src: args['--src'] || '.',
     exts: args['--ext'] || ['js,py,java,sql,ts,sh,go,c,cpp'],
     page_options: 'page.defg',
+    mathjax: "mathjax-config.js",
   }
   ctx.exts = ctx.exts.join(',').split(',').map(e => '.' + e.trim())
   ctx.pdf = args['--pdf'] || path.join(path.dirname(ctx.readme), path.basename(ctx.readme, '.md') + '.pdf')
@@ -452,14 +453,38 @@ async function openPDF(ctx) {
   const readme = readreadme(ctx)
   const page_options = readpageoptions(ctx)
 
+  let created = false
+
   const options = { dest: ctx.pdf }
   if(ctx.style) options.stylesheet = ctx.style
   if(page_options) {
     options.pdf_options = page_options
     options.pdf_options.displayHeaderFooter = true
   }
+  const mathjax = ctx.mathjax ? path.resolve(ctx.mathjax) : null;
+  if(mathjax) {
+    if(!fs.existsSync(mathjax)) {
+      const mconf = `MathJax = {
+	tex: {
+		tags: 'ams',
+		inlineMath: [
+			['$', '$'],
+			['\\(', '\\)'],
+		],
+	},
+};`
+      fs.writeFileSync(mathjax, mconf)
+      created = true
+    }
+    options.script = [
+      { path: path.join(__dirname,ctx.mathjax) },
+      { url: "https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" },
+    ]
+  }
 
   await mdToPdf({ path: ctx.readme }, options).catch(console.error)
+
+  if(created) fs.unlinkSync(mathjax)
 
   openItem(ctx.pdf)
 }
