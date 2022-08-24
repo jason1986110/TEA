@@ -158,6 +158,7 @@ function asDiff(docblocks) {
  */
 function regen_readme(ctx, readme, docblocks) {
   const n = docblocks.length
+  console.log('n', n)
   const chosen = []
   const perm = []
 

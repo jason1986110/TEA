@@ -4,7 +4,14 @@ body {
 h1 {
   text-align: center;
 }
-h3 {
+.sidenote {
+ background: #C4A997;
+ padding:1em 3em 3em 1em;
+ margin:2em 4em;
+ border:1px solid #AD876E;
+ border-radius:6px;
+}
+.sidenote h3 {
   text-align: center;
 }
 img {
@@ -15,4 +22,7 @@ img {
 }
 .page-break {
   page-break-after: always
+}
+.techdets img {
+  width: 256px;
 }
