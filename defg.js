@@ -454,8 +454,10 @@ async function openPDF(ctx) {
 
   const options = { dest: ctx.pdf }
   if(ctx.style) options.stylesheet = ctx.style
-  if(page_options) options.pdf_options = page_options
-  options.pdf_options.displayHeaderFooter = true
+  if(page_options) {
+    options.pdf_options = page_options
+    options.pdf_options.displayHeaderFooter = true
+  }
 
   await mdToPdf({ path: ctx.readme }, options).catch(console.error)
 
