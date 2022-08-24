@@ -467,7 +467,6 @@ async function openPDF(ctx) {
 		tags: 'ams',
 		inlineMath: [
 			['$', '$'],
-			['\\(', '\\)'],
 		],
 	},
 };`
