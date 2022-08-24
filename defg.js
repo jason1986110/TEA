@@ -366,7 +366,7 @@ async function openPDF(ctx) {
       created = true
     }
     options.script = [
-      { path: path.join(__dirname,ctx.mathjax) },
+      { path: mathjax },
       { url: "https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" },
     ]
   }
