@@ -54,6 +54,7 @@
 //**   size, header & footer using the following Puppeteer options: https://pptr.dev/api/puppeteer.pdfoptions
 //**
 //** ## Usage
+//**
 //** ```
 //** $> defg
 //**   # ensures README contains all 'user documentation' comments (//** or ##** comments)

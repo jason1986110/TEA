@@ -113,7 +113,6 @@ Options
    --ignore-src:   ignore source and just generate from readme
 ```
 
-
 <div class="page-break"></div>
 
 # Technical Details
