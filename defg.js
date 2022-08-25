@@ -225,7 +225,7 @@ function xtractUserDocz(ctx) {
   const stat = fs.lstatSync(ctx.src)
   if(stat && stat.isFile()) xtract_1(ctx.src, docblocks)
   else x_1(ctx.src)
-  if(docblocks.length) return docblocks
+  if(docblocks.length) return docblocks.sort((a,b) => a[0] < b[0]);
 
   function x_1(p) {
     const ntries = fs.readdirSync(p, { withFileTypes: true })
