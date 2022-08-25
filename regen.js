@@ -207,12 +207,12 @@ function regen(ctx, readme, docblocks) {
       }
       if(i == maxLookAhead) {
         dist++;
-        diff.push({ removed: true, lr, dist });
+        nr++;
+        diff.push({ removed: true, value: lr, dist });
         dist++;
-        diff.push({ added: true, ld, dist });
+        nd++;
+        diff.push({ added: true, value: ld, dist });
       }
-      nd++;
-      nr++;
       if(min.dist != null && dist > min.dist) return { shorted: true };
     }
     if(!isPartial) {
