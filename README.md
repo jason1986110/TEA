@@ -62,7 +62,7 @@ As you do all these, `defg` will preserve your changes whenever it updates your 
 
 <div class="insert-block" style="margin-left:2.2em">
   <h4>Sample</h4>
-  <div style="background:white;border-radius:4px;">
+  <div style="background:white;border-radius:4px;white-space:pre;">
   <code style="white-space:pre">
     format: A4
     margin: 20mm 20mm
@@ -123,6 +123,7 @@ For those interested, this section discusses some algorithmic details of <code>d
   <div class="techdets">
     <img alt="techdets" src="./techdets.png"></img>
   </div>
+<div style="font-style: italic;font-weight: bold;color: #999">A nicely formatted PDF of this can be found here: <a href="https://github.com/theproductiveprogrammer/defg/blob/master/README.pdf">README.pdf</a>.</div>
 </div>
 
 We have three fundamental problems we are solving in `defg`:
