@@ -74,8 +74,8 @@
 //** it can incorporate all $Sp$ lines by simply recognizing them during the and, (c) it can exit very early in the cycle
 //** thus trimming the tree effectively.
 
-const log = require('./logger.js')(console.log.bind(console));
-//const log = require('./logger.js')();
+const logger = require('./logger.js')
+const log = process.env.DEBUG ? logger(console.log.bind(console)) : logger();
 
 function regen(ctx, readme, docblocks) {
   const rlines = readme.split(/[\r\n]/g);
