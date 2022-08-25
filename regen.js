@@ -74,45 +74,68 @@
 //** it can incorporate all $Sp$ lines by simply recognizing them during the and, (c) it can exit very early in the cycle
 //** thus trimming the tree effectively.
 
+const log = require('./logger.js')(console.log.bind(console));
+//const log = require('./logger.js')();
+
 function regen(ctx, readme, docblocks) {
-  const n = docblocks.length
+  const rlines = readme.split(/[\r\n]/g);
+  log("README");
+  rlines.map(l => log(l));
+  log();
+  log("DOCBLOCKS");
+  docblocks.map(l => log(l));
 
-  const chosen = []
-  const perm = []
+  const n = docblocks.length;
+  log("number of docblocks", n);
 
-  const rlines = readme.split(/[\r\n]/g)
+  const chosen = [];
+  const perm = [];
+  const diff = [];
 
-  const min = { dist: null, perm: null }
-  gen_1(0, 0, 0)
+  const min = { dist: null, diff: null };
+  gen_1(0, 0, 0);
 
-  let data = []
-  min.perm.map(block => data = data.concat(block))
-  const r = find_dist_1(data, rlines, 0, 0, 0, true)
-  const res = r.data.join("\n").trim()
-
-  return res
+  log("minimum diff found");
+  min.diff.map(d => log(d));
+  return min.diff;
 
   function gen_1(nd, nr, curr_dist) {
+    const nf = diff.length;
+
     for(let i = 0;i < n;i++) {
       if(chosen[i]) continue;
 
-      chosen[i] = true
-      perm.push(docblocks[i])
-      let data = []
-      perm.map(block => data = data.concat(block))
+      log("adding docblock", i, docblocks[i], "to permutation");
+      perm.push(docblocks[i]);
+      chosen[i] = true;
 
-      const r = find_dist_1(data, rlines, nd, nr, curr_dist)
-      if(r) {
+      let data = [];
+      perm.map(block => data = data.concat(block));
+
+      log("diff starting from", nd, data[nd], "vs", nr, rlines[nr], "dist", curr_dist);
+      const r = diff_1(data, rlines, nd, nr, curr_dist, perm.length < n);
+      if(r.shorted) {
+        log("diff so far");
+        diff.slice(nf).map(d => log(d));
+        log("hit > minimum dist", min.dist, "pruned tree");
+      } else {
+        log("found diff");
+        diff.slice(nf).map(d => log(d));
         if(perm.length == n) {
-          min.perm = [...perm]
-          min.dist = r.dist
+          log("found minimum dist:", r.dist, "saving!");
+          log("full diff");
+          diff.map(d => log(d));
+          min.dist = r.dist;
+          min.diff = [...diff];
         } else {
           gen_1(r.nd, r.nr, r.dist)
         }
       }
 
-      perm.pop()
-      chosen[i] = false
+      log("removing docblock", i, docblocks[i], "from permutation");
+      chosen[i] = false;
+      perm.pop();
+      diff.length = nf;
     }
   }
 
@@ -121,21 +144,17 @@ function regen(ctx, readme, docblocks) {
    * data (looking 'n' lines ahead for a reasonable match), and skipping `insert-block` inserted text
    * and recording all the changed lines as the distance between the files.
    */
-  function find_dist_1(data, rlines, nd, nr, curr_dist, insert) {
-    let dist = curr_dist
-    let inSkipBlock = false
+  function diff_1(data, rlines, nd, nr, dist, isPartial) {
+    let inSkipBlock = false;
     while(nd < data.length && nr < rlines.length) {
-      const ld = data[nd]
-      const lr = rlines[nr]
+      const ld = data[nd];
+      const lr = rlines[nr];
 
       if(inSkipBlock) {
-        nr++
-        if(insert) {
-          data.splice(nd, 0, lr)
-          nd++
-        }
+        nr++;
+        diff.push({ fresh: true, value: lr });
         if(isEndDiv(lr)) inSkipBlock = false
-        continue
+        continue;
       }
       if(lr && isSkipDiv(lr)) {
         inSkipBlock = true;
@@ -143,20 +162,23 @@ function regen(ctx, readme, docblocks) {
       }
 
       if(ld === lr) {
-        nd++
-        nr++
-        continue
+        nd++;
+        nr++;
+        diff.push({ value: lr, dist });
+        continue;
       }
       if(!ld) {
-        nd++
+        nd++;
         continue
       }
-      if(!lr || isSplLine(lr)) {
+      if(!lr) {
+        nr++;
+        if(!data[nd-1] || isSplLine(rlines[nr]) || isSplLine(rlines[nr-2])) diff.push({ fresh: true, value: lr, dist });
+        continue;
+      }
+      if(isSplLine(lr)) {
         nr++
-        if(insert) {
-          data.splice(nd, 0, lr)
-          nd++
-        }
+        diff.push({ fresh: true, value: lr, dist });
         continue
       }
       const maxLookAhead = 7
@@ -165,44 +187,55 @@ function regen(ctx, readme, docblocks) {
         const ld_ = data[nd+i]
         const lr_ = rlines[nr+i]
         if(lr_ === ld) {
-          dist += i
-          nr += i
-          break
+          while(i) {
+            dist++;
+            diff.push({ removed: true, value: rlines[nr], dist });
+            nr++;
+            i--;
+          }
+          break;
         }
         if(ld_ === lr) {
-          dist += i
-          nd += i
-          break
+          while(i) {
+            dist++;
+            diff.push({ added: true, value: data[nd], dist });
+            nd++;
+            i--;
+          }
+          break;
         }
       }
       if(i == maxLookAhead) {
-        dist += 2
+        dist++;
+        diff.push({ removed: true, lr, dist });
+        dist++;
+        diff.push({ added: true, ld, dist });
       }
-      nd++
-      nr++
-      if(min.dist != null && dist > min.dist) return
+      nd++;
+      nr++;
+      if(min.dist != null && dist > min.dist) return { shorted: true };
     }
-    if(insert) {
-      while(nr < rlines.length) {
-        const lr = rlines[nr++]
+    if(!isPartial) {
+      for(let i = nr;i < rlines.length;i++) {
+        const lr = rlines[i];
         if(inSkipBlock) {
-          data.push(lr)
-          nd++
-          if(isEndDiv(lr)) inSkipBlock = false
-          continue
+          diff.push({ fresh: true, value: lr, dist });
+          if(isEndDiv(lr)) inSkipBlock = false;
+          continue;
         }
         if(lr && isSkipDiv(lr)) {
-          data.push(lr)
-          nd++
+          diff.push({ fresh: true, value: lr, dist });
           inSkipBlock = true
           continue;
         }
         if(!lr || isSplLine(lr)) {
-          data.push(lr)
-          nd++
+          diff.push({ fresh: true, value: lr, dist });
           continue
         }
-        break
+        diff.push({ removed: true, value: lr, dist });
+      }
+      for(let i = nd;i < data.length;i++) {
+        diff.push({ added: true, value: data[i], dist });
       }
     }
     return { nd, nr, dist, data }
@@ -213,7 +246,8 @@ function isEndDiv(l) { return l.match(/^<\/div>[ \t]*$/); }
 function isSkipDiv(l) { return l.match(/^<div  *class=.*insert-block.*>[ \t]*$/); }
 
 function isSplLine(l) {
-  return l.match(/^[ \t]*[!]\[.*\]\([^)]*\)[ \t\n]*$/) || l.match(/^[ \t]*<.*>[ \t\n]*$/)
+  if(!l) return false;
+  return l.match(/^[ \t]*[!]\[.*\]\([^)]*\)[ \t\n]*$/) || l.match(/^[ \t]*<.*>[ \t\n]*$/);
 }
 
 module.exports = regen
