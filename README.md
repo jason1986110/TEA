@@ -107,7 +107,8 @@ Options
    -v, --version:  show version
    --src:          path of source files (or path of a single source file)
    --readme:       path of README file to check (./README.md by default)
-   --style:        path of CSS file containing stying (./README.css by default)
+   --style:        path of CSS file containing styling (./README.css by default)
+   --page-def:     path of file containing pdf page definition
    --pdf:          path of pdf generated (./README.pdf by default)
    --ext:          list of valid source file extensions (js,py,java,sql,ts,sh,go,c,cpp by default)
    --ignore-src:   ignore source and just generate from readme
