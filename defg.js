@@ -76,7 +76,6 @@ const { exec } = require('child_process')
 const arg = require('arg')
 const { version } = require('./package.json')
 
-const Diff = require('diff')
 const chalk = require('chalk')
 
 const matter = require('gray-matter')
@@ -146,7 +145,6 @@ function asDiff(docblocks) {
   let diff = []
   docblocks.map(block => {
     diff = diff.concat(block.map(value => {
-      value += "\n"
       return { fresh: true, value }
     }))
   })
@@ -324,7 +322,7 @@ function saveReadme(ctx, diff) {
       o.push(part.value);
     }
   }
-  const data = o.join("").trim()
+  const data = o.join("\n").trim()
   fs.writeFile(ctx.readme, data, err => {
     if(err) console.error(err)
     else openPDF(ctx);
@@ -379,8 +377,7 @@ async function openPDF(ctx) {
 }
 
 function regen_readme(ctx, readme, docblocks) {
-  const data = regen(ctx, readme, docblocks)
-  const diff = Diff.diffLines(readme, data, { ignoreWhitespace: false, newlineIsToken: false })
+  const diff = regen(ctx, readme, docblocks)
   saveReadme(ctx, diff)
 }
 
