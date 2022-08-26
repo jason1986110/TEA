@@ -89,6 +89,18 @@
 //**
 //** A final (minor) improvement, is to short-circuit all searches as soon as we find a $0$-difference (nothing can be
 //** better).
+//**
+//** ## Time Trials
+//**
+//** For comparison, I ran an experiment with 70 docblocks for each of the algorithmic approaches:
+//**
+//** - Naive/Generic Approach: Unknown (stopped run after 2+ days)
+//** - Algorithm 1: 16 hours 10 minutes
+//** - With Greedy Initialization: **7 seconds!**
+//**
+//** Because the greedy optimization is so much better in performance, `defg` allows you to pick a "quick mode" where
+//** it will only use the greedy algorithm. This uses the assumption that most blocks are substantially different. You
+//** can use this mode if it turns out that the full search is taking too long.
 
 const logger = require('./logger.js')
 const log = process.env.DEBUG ? logger(console.log.bind(console)) : logger();

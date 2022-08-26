@@ -206,3 +206,28 @@ thus trimming the tree effectively.
 <div class="insert-block">
 In brief, this is the algorithm we are using in <code>defg</code>. You can see the code and details in <code>regen.js</code>.
 </div>
+## Futher Improvements
+
+Because of the nature of our problem, we can make a reasonable assumption that most blocks have very little in
+similar. If we assume this to the case, then we can search for an expected solution in $O(m^2)$ instead of $O(m!)$
+using the following strategy:
+
+1. Try each block one by one on the first slot and use the best one (the one with the smallest distance).
+2. Repeat with the remaining blocks for the next slot and so on.
+
+This greedy approach will very likely give us the optimal solution (given little similarity between blocks). If we
+then feed this as the input into the first algorithm we should be able to confirm we don't have a better solution
+in roughly $O(n)$ time.
+
+A final (minor) improvement, is to short-circuit all searches as soon as we find a $0$-difference (nothing can be
+better).
+
+## Time Trials
+For comparison, I ran an experiment with 70 docblocks for each of the algorithmic approaches:
+- Naive/Generic Approach: Unknown (stopped run after 2+ days)
+- Algorithm 1: 16 hours 10 minutes
+- With Greedy Initialization: **7 seconds!**
+
+Because the greedy optimization is so much better in performance, `defg` allows you to pick a "quick mode" where
+it will only use the greedy algorithm. This uses the assumption that most blocks are substantially different. You
+can use this mode if it turns out that the full search is taking too long.
