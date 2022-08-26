@@ -107,10 +107,10 @@ const log = process.env.DEBUG ? logger(console.log.bind(console)) : logger();
 
 function regen(ctx, readme, docblocks) {
   const rlines = readme.split(/[\r\n]/g);
-  log("README");
+  log("README", rlines.length);
   rlines.map(l => log(l));
   log();
-  log("DOCBLOCKS");
+  log("DOCBLOCKS", docblocks.length);
   docblocks.map(l => log(l));
 
   const n = docblocks.length;
@@ -121,11 +121,82 @@ function regen(ctx, readme, docblocks) {
   const diff = [];
 
   const min = { dist: null, diff: null };
-  gen_1(0, 0, 0);
+  docblocks = order_docblocks(docblocks, 0);
+  log("REORDERED DOCBLOCKS", docblocks.length);
+  docblocks.map(l => log(l));
 
-  log("minimum diff found");
-  min.diff.map(d => log(d));
-  return min.diff;
+  if(ctx.quick) {
+    log("minimum diff found");
+    min.diff.map(d => log(d));
+    return diff;
+  } else {
+
+    diff.length = 0; // kill existing diff because we'll regenerate it
+    gen_1(0, 0, 0);
+
+    log("minimum diff found");
+    min.diff.map(d => log(d));
+    return min.diff;
+  }
+
+  function order_docblocks(docblocks) {
+    let nr = 0;
+    let nd = 0;
+    let nf = 0;
+    let curr_dist = 0;
+
+    const picked = [];
+    const ret = [];
+
+    log("ordering", n, "docblocks");
+    for(let i = 0;i < n;i++) {
+
+      log("picking position", i);
+
+      const nf = diff.length;
+      const best = { docblock: null, nr: null,  nd: null, dist: null, diff: null }
+      for(let ii = 0;ii < n;ii++) {
+        if(best.dist === 0) break;
+
+        if(picked[ii]) continue;
+
+        log("trying docblock", ii, docblocks[ii], "for position", i);
+        ret.push(docblocks[ii]);
+        picked[ii] = true;
+
+        let data = [];
+        ret.map(block => data = data.concat(block));
+
+        log("diff starting from", nd, data[nd], "vs", nr, rlines[nr], "dist", curr_dist);
+        const r = diff_1(data, rlines, nd, nr, curr_dist, i < (n-1));
+        if(best.dist === null || best.dist > r.dist) {
+          log("found best diff");
+          best.diff = diff.slice(nf);
+          best.diff.map(d => log(d));
+          best.docblock = docblocks[ii];
+          best.nr = r.nr;
+          best.nd = r.nd;
+          best.dist = r.dist;
+        } else {
+          log("found worse diff");
+          diff.slice(nf).map(d => log(d));
+        }
+        diff.length = nf;
+        ret.pop();
+        picked[ii] = false;
+      }
+
+      log("picked docblock", best.docblock, "for position", i);
+      ret.push(best.docblock);
+      nr = best.nr;
+      nd = best.nd;
+      curr_dist = best.dist;
+      best.diff.forEach(d => diff.push(d));
+    }
+
+    return ret;
+
+  }
 
   function gen_1(nd, nr, curr_dist) {
     const nf = diff.length;
