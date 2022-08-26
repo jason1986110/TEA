@@ -119,6 +119,10 @@ function regen(ctx, readme, docblocks) {
     const nf = diff.length;
 
     for(let i = 0;i < n;i++) {
+      if(min.dist === 0) {
+        log("dist", 0, "short-circuiting the rest of the search!");
+        return;
+      }
       if(chosen[i]) continue;
 
       log("adding docblock", i, docblocks[i], "to permutation");
