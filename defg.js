@@ -63,13 +63,15 @@
 //** Options
 //**    -h, --help:     show help
 //**    -v, --version:  show version
-//**    --src:          path of source files (or path of a single source file)
-//**    --readme:       path of README file to check (./README.md by default)
+//**    --src:          glob paths to source files [can be multiple]
+//**    --skip:         glob paths to exclude/ignore when searching source files
+//**    --ext:          list of valid source file extensions (js,py,java,sql,ts,sh,go,c,cpp by default)
+//**    --readme:       path of README file to merge (./README.md by default)
 //**    --style:        path of CSS file containing styling (./README.css by default)
 //**    --page-def:     path of file containing pdf page definition
-//**    --pdf:          path of pdf generated (./README.pdf by default)
-//**    --ext:          list of valid source file extensions (js,py,java,sql,ts,sh,go,c,cpp by default)
-//**    --ignore-src:   ignore source and just generate from readme
+//**    --pdf:          path of output pdf generated (./README.pdf by default)
+//**    --ignore-src:   ignore source and just generate PDF from README.md
+//**    --quick:        use faster (but less accurate) resolution algorithm
 //** ```
 const fs = require('fs')
 const path = require('path')
@@ -79,6 +81,12 @@ const arg = require('arg')
 const { version } = require('./package.json')
 
 const chalk = require('chalk')
+let globby
+import('globby')
+.then(v => {
+  globby = v;
+  main();
+})
 
 const matter = require('gray-matter')
 
@@ -96,12 +104,13 @@ function main() {
   const args = arg({
     '--help': Boolean,
     '--version': Boolean,
-    '--src': String,
+    '--src': [ String ],
+    '--skip': [ String ],
+    '--ext': [ String ],
     '--readme': String,
     '--style': String,
     '--page-def': String,
     '--pdf': String,
-    '--ext': [ String ],
     '--ignore-src': Boolean,
     '--quick': Boolean,
 
@@ -114,12 +123,18 @@ function main() {
 
   const ctx = {
     readme: args['--readme'] || 'README.md',
-    src: args['--src'] || '.',
+    src: args['--src'] || ['**'],
+    skip: args['--skip'],
     exts: args['--ext'] || ['js,py,java,sql,ts,sh,go,c,cpp'],
     page_options: args['--page-def'] || 'page.defg',
     quick: args['--quick'] || false,
     mathjax: "mathjax-config.js",
   }
+
+  const globbyopts = { ignoreFiles: '.gitignore' };
+  if(ctx.skip) globbyopts.ignore = ctx.skip;
+  const src = globby.globbySync(ctx.src, globbyopts);
+
   ctx.exts = ctx.exts.join(',').split(',').map(e => '.' + e.trim())
   ctx.pdf = args['--pdf'] || path.join(path.dirname(ctx.readme), path.basename(ctx.readme, '.md') + '.pdf')
 
@@ -130,7 +145,7 @@ function main() {
   if(args['--ignore-src']) {
     openPDF(ctx)
   } else {
-    const docblocks = xtractUserDocz(ctx)
+    const docblocks = xtractUserDocz(src, ctx.exts)
     if(!docblocks) {
       console.log("No documentation comments found...")
       console.log("Documentation comments are single line comments that start with \/\/** or \#\#**")
@@ -164,13 +179,14 @@ function showHelp() {
 Options
    -h, --help:     show help
    -v, --version:  show version
-   --src:          path of source files (or path of a single source file)
-   --readme:       path of README file to check (./README.md by default)
+   --src:          glob paths to source files [can be multiple]
+   --skip:         glob paths to exclude/ignore when searching source files
+   --ext:          list of valid source file extensions (js,py,java,sql,ts,sh,go,c,cpp by default)
+   --readme:       path of README file to merge (./README.md by default)
    --style:        path of CSS file containing styling (./README.css by default)
    --page-def:     path of file containing pdf page definition
    --pdf:          path of pdf generated (./README.pdf by default)
-   --ext:          list of valid source file extensions (js,py,java,sql,ts,sh,go,c,cpp by default)
-   --ignore-src:   ignore source and just generate from readme
+   --ignore-src:   ignore source and just generate PDF from README.md
    --quick:        use a faster (but less accurate) resolution algorithm
 `)
 }
@@ -221,40 +237,24 @@ function read(ctx) {
 }
 
 /*    way/
- * extract user documentation comment lines from
- * all javascript files, ignoring some common directories (node_modules etc)
+ * extract user documentation comment lines from all files with the relevant extensions
  */
-function xtractUserDocz(ctx) {
-  const docblocks = []
+function xtractUserDocz(src, exts) {
+  if(!src) return;
 
-  const stat = fs.lstatSync(ctx.src)
-  if(stat && stat.isFile()) xtract_1(ctx.src, docblocks)
-  else x_1(ctx.src)
+  const docblocks = [];
+  src.forEach(f => {
+    let m = true;
+    if(exts) {
+      m = false;
+      exts.forEach(ext => {
+        if(f.endsWith(ext)) m = true
+      });
+    }
+    if(m) xtract_1(f, docblocks)
+  });
+
   if(docblocks.length) return docblocks;
-
-  function x_1(p) {
-    const ntries = fs.readdirSync(p, { withFileTypes: true })
-    ntries.map(ntry => {
-      if(ntry.isDirectory() && is_ok_1(ntry.name)) return x_1(path.join(p, ntry.name))
-      if(!ntry.isFile()) return
-      if(!ntry.name) return
-      let m = false
-      ctx.exts.map(ext => {
-        if(ntry.name.endsWith(ext)) m = true
-      })
-      if(m) xtract_1(path.join(p, ntry.name), docblocks)
-    })
-  }
-
-  function is_ok_1(n) {
-    if(!n) return
-    if(n === 'node_modules') return
-    if(n.startsWith('.')) return
-    if(n === 'dist') return
-    if(n === 'tmp' || n === '_tmp') return
-
-    return true
-  }
 
   /*    understand/
    * extract all the comments in files in blocks so they can be
@@ -399,5 +399,3 @@ function openItem(n) {
     default : return exec('xdg-open ' + n)
   }
 }
-
-main()
