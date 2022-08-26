@@ -103,6 +103,7 @@ function main() {
     '--pdf': String,
     '--ext': [ String ],
     '--ignore-src': Boolean,
+    '--quick': Boolean,
 
     '-h': '--help',
     '-v': '--version',
@@ -116,6 +117,7 @@ function main() {
     src: args['--src'] || '.',
     exts: args['--ext'] || ['js,py,java,sql,ts,sh,go,c,cpp'],
     page_options: args['--page-def'] || 'page.defg',
+    quick: args['--quick'] || false,
     mathjax: "mathjax-config.js",
   }
   ctx.exts = ctx.exts.join(',').split(',').map(e => '.' + e.trim())
@@ -169,6 +171,7 @@ Options
    --pdf:          path of pdf generated (./README.pdf by default)
    --ext:          list of valid source file extensions (js,py,java,sql,ts,sh,go,c,cpp by default)
    --ignore-src:   ignore source and just generate from readme
+   --quick:        use a faster (but less accurate) resolution algorithm
 `)
 }
 function showVersion() {
