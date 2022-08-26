@@ -105,13 +105,15 @@ $> defg
 Options
    -h, --help:     show help
    -v, --version:  show version
-   --src:          path of source files (or path of a single source file)
-   --readme:       path of README file to check (./README.md by default)
+   --src:          glob paths to source files [can be multiple]
+   --skip:         glob paths to exclude/ignore when searching source files
+   --ext:          list of valid source file extensions (js,py,java,sql,ts,sh,go,c,cpp by default)
+   --readme:       path of README file to merge (./README.md by default)
    --style:        path of CSS file containing styling (./README.css by default)
    --page-def:     path of file containing pdf page definition
-   --pdf:          path of pdf generated (./README.pdf by default)
-   --ext:          list of valid source file extensions (js,py,java,sql,ts,sh,go,c,cpp by default)
-   --ignore-src:   ignore source and just generate from readme
+   --pdf:          path of output pdf generated (./README.pdf by default)
+   --ignore-src:   ignore source and just generate PDF from README.md
+   --quick:        use faster (but less accurate) resolution algorithm
 ```
 
 <div class="page-break"></div>
