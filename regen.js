@@ -73,6 +73,22 @@
 //** This algorithm has the advantage that (a) it can work with partial permutations and resume them as we needed, (b)
 //** it can incorporate all $Sp$ lines by simply recognizing them during the and, (c) it can exit very early in the cycle
 //** thus trimming the tree effectively.
+//**
+//** ## Futher Improvements
+//**
+//** Because of the nature of our problem, we can make a reasonable assumption that most blocks have very little in
+//** similar. If we assume this to the case, then we can search for an expected solution in $O(m^2)$ instead of $O(m!)$
+//** using the following strategy:
+//**
+//** 1. Try each block one by one on the first slot and use the best one (the one with the smallest distance).
+//** 2. Repeat with the remaining blocks for the next slot and so on.
+//**
+//** This greedy approach will very likely give us the optimal solution (given little similarity between blocks). If we
+//** then feed this as the input into the first algorithm we should be able to confirm we don't have a better solution
+//** in roughly $O(n)$ time.
+//**
+//** A final (minor) improvement, is to short-circuit all searches as soon as we find a $0$-difference (nothing can be
+//** better).
 
 const logger = require('./logger.js')
 const log = process.env.DEBUG ? logger(console.log.bind(console)) : logger();
