@@ -208,6 +208,7 @@ thus trimming the tree effectively.
 <div class="insert-block">
 In brief, this is the algorithm we are using in <code>defg</code>. You can see the code and details in <code>regen.js</code>.
 </div>
+
 ## Futher Improvements
 
 Because of the nature of our problem, we can make a reasonable assumption that most blocks have very little in
