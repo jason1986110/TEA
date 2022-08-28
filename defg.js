@@ -113,6 +113,7 @@ function main() {
     '--pdf': String,
     '--ignore-src': Boolean,
     '--quick': Boolean,
+    '--as-html': Boolean,
 
     '-h': '--help',
     '-v': '--version',
@@ -128,6 +129,7 @@ function main() {
     exts: args['--ext'] || ['js,py,java,sql,ts,sh,go,c,cpp'],
     page_options: args['--page-def'] || 'page.defg',
     quick: args['--quick'] || false,
+    html: args['--as-html'] || false,
     mathjax: "mathjax-config.js",
   }
 
@@ -137,19 +139,20 @@ function main() {
 
   ctx.exts = ctx.exts.join(',').split(',').map(e => '.' + e.trim())
   ctx.pdf = args['--pdf'] || path.join(path.dirname(ctx.readme), path.basename(ctx.readme, '.md') + '.pdf')
+  if(ctx.html) ctx.html = path.join(path.dirname(ctx.pdf), path.basename(ctx.pdf, '.pdf') + '.html')
 
   if(args['--style']) ctx.style = args['--style']
   else if(fs.existsSync("README.css")) ctx.style = "README.css"
 
   const readme = readreadme(ctx)
   if(args['--ignore-src']) {
-    openPDF(ctx)
+    openDoc(ctx)
   } else {
     const docblocks = xtractUserDocz(src, ctx.exts)
     if(!docblocks) {
       console.log("No documentation comments found...")
       console.log("Documentation comments are single line comments that start with \/\/** or \#\#**")
-      openPDF(ctx)
+      openDoc(ctx)
       return
     }
 
@@ -332,14 +335,14 @@ function saveReadme(ctx, diff) {
   const data = o.join("\n").trim()
   fs.writeFile(ctx.readme, data, err => {
     if(err) console.error(err)
-    else openPDF(ctx);
+    else openDoc(ctx);
   })
 }
 
 /*    way/
- * generate and open pdf
+ * generate and open pdf or html doc
  */
-async function openPDF(ctx) {
+async function openDoc(ctx) {
   if(!fs.existsSync(ctx.readme)) {
     console.log(`${ctx.readme} not found to open!`)
     return
@@ -350,7 +353,13 @@ async function openPDF(ctx) {
 
   let created = false
 
-  const options = { dest: ctx.pdf }
+  const options = {}
+  if(ctx.html) {
+    options.dest = ctx.html;
+    options.as_html = true;
+  } else {
+    options.dest = ctx.pdf;
+  }
   if(ctx.style) options.stylesheet = ctx.style
   if(page_options) {
     options.pdf_options = page_options
@@ -380,7 +389,8 @@ async function openPDF(ctx) {
 
   if(created) fs.unlinkSync(mathjax)
 
-  openItem(ctx.pdf)
+  if(ctx.html) openItem(ctx.html);
+  else openItem(ctx.pdf);
 }
 
 function regen_readme(ctx, readme, docblocks) {
