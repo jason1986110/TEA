@@ -96,11 +96,30 @@ const regen = require('./regen.js')
  * main entry point into our program
  *
  *    way/
- * find all user documentation comments and check them against
- * the README.md. Display any not found or, if all found, open
- * the README as pdf.
+ * load the context with user parameters, load any plugins,
+ * extract all the documenation comments if needed, and regenerate the documentation.
  */
 function main() {
+  const ctx = loadCtx();
+
+  loadPlugins(ctx, (err, plugins) => {
+    if(err) return console.error(err);
+    ctx.plugins = plugins;
+    readreadme(ctx, (err, readme) => {
+      if(err) return console.error(err);
+      if(ctx.ignore_src) {
+        docFromMd(ctx);
+      } else {
+        xtractUserDocz(ctx, (err, docblocks) => {
+          if(err) return console.error(err);
+          regenerate(ctx, readme, docblocks);
+        });
+      }
+    });
+  });
+}
+
+function loadCtx() {
   const args = arg({
     '--help': Boolean,
     '--version': Boolean,
@@ -114,6 +133,7 @@ function main() {
     '--ignore-src': Boolean,
     '--quick': Boolean,
     '--as-html': Boolean,
+    '--plugin': [ String ],
 
     '-h': '--help',
     '-v': '--version',
@@ -131,11 +151,9 @@ function main() {
     quick: args['--quick'] || false,
     html: args['--as-html'] || false,
     mathjax: "mathjax-config.js",
+    plugins: args['--plugin'],
+    ignore_src: args['--ignore-src'],
   }
-
-  const globbyopts = { ignoreFiles: '.gitignore' };
-  if(ctx.skip) globbyopts.ignore = ctx.skip;
-  const src = globby.globbySync(ctx.src, globbyopts);
 
   ctx.exts = ctx.exts.join(',').split(',').map(e => '.' + e.trim())
   ctx.pdf = args['--pdf'] || path.join(path.dirname(ctx.readme), path.basename(ctx.readme, '.md') + '.pdf')
@@ -144,24 +162,21 @@ function main() {
   if(args['--style']) ctx.style = args['--style']
   else if(fs.existsSync("README.css")) ctx.style = "README.css"
 
-  const readme = readreadme(ctx)
-  if(args['--ignore-src']) {
-    openDoc(ctx)
-  } else {
-    const docblocks = xtractUserDocz(src, ctx.exts)
-    if(!docblocks) {
-      console.log("No documentation comments found...")
-      console.log("Documentation comments are single line comments that start with \/\/** or \#\#**")
-      openDoc(ctx)
-      return
-    }
+  return ctx;
+}
 
-    if(readme == null) {
-      saveReadme(ctx, asDiff(docblocks))
-    } else {
-      regen_readme(ctx, readme, docblocks)
+function loadPlugins(ctx, cb) {
+  if(!ctx.plugins) return cb();
+  const plugins = {}
+  for(let i = 0;i < ctx.plugins.length;i++) {
+    const p = ctx.plugins[i];
+    try {
+      plugins[p] = require(p);
+    } catch(e) {
+      return cb(`Failed to load plugin: ${p}`);
     }
   }
+  return cb(null, plugins);
 }
 
 function asDiff(docblocks) {
@@ -197,34 +212,53 @@ function showVersion() {
   console.log(version)
 }
 
-function readreadme(ctx) { return readsafely(ctx.readme); }
+function readreadme(ctx, cb) {
+  readsafely(ctx.readme, (err, data) => {
+    if(err) return cb(err);
+    if(!ctx.plugins) return cb(null, data);
+    const names = Object.keys(ctx.plugins);
+    p_r_1(0);
+  });
 
-function readpageoptions(ctx) {
-  let page_options = readsafely(ctx.page_options);
-  if(!page_options) return
-
-  if(!page_options.match(/^[ \t]/)) {
-    page_options = page_options.split(/[\r\n]/g).map(l => '  ' + l).join("\n");
+  function p_r_1(ndx) {
+    if(ndx >= names.length) return cb(null, data);
+    const plugin = ctx.plugins[names[ndx]];
+    if(plugin.raw_readme) data = plugin.raw_readme(data);
+    p_r_1(ndx+1);
   }
+}
 
-  const front = matter(`---
+function readpageoptions(ctx, cb) {
+  readsafely(ctx.page_options, (err, page_options) => {
+    if(err) return cb(err);
+
+    if(!page_options) return cb();
+
+    if(!page_options.match(/^[ \t]/)) {
+      page_options = page_options.split(/[\r\n]/g).map(l => '  ' + l).join("\n");
+    }
+
+    const front = matter(`---
 ${page_options}
 ---
-  `)
+  `);
 
-  if(front) return front.data
+    if(front) cb(null, front.data);
+  });
 }
 
 /*    way/
  * safely read a file
  */
-function readsafely(f) {
-  try {
-    return fs.readFileSync(f, 'utf8').trim()
-  } catch(e) {
-    if(e.code === 'ENOENT') return null
-    throw e
-  }
+function readsafely(f, cb) {
+  fs.readFile(f, 'utf8', (err, data) => {
+    if(err) {
+      if(err.code === 'ENOENT') return cb();
+      return cb(err);
+    } else {
+      return cb(null, data);
+    }
+  });
 }
 
 /*    way/
@@ -242,22 +276,27 @@ function read(ctx) {
 /*    way/
  * extract user documentation comment lines from all files with the relevant extensions
  */
-function xtractUserDocz(src, exts) {
-  if(!src) return;
+function xtractUserDocz(ctx, cb) {
+  if(!ctx.src) return cb("No source files found to search. Do you want to --ignore-src?");
+
+  const globbyopts = { ignoreFiles: '.gitignore' };
+  if(ctx.skip) globbyopts.ignore = ctx.skip;
+  const src = globby.globbySync(ctx.src, globbyopts);
 
   const docblocks = [];
   src.forEach(f => {
     let m = true;
-    if(exts) {
+    if(ctx.exts) {
       m = false;
-      exts.forEach(ext => {
+      ctx.exts.forEach(ext => {
         if(f.endsWith(ext)) m = true
       });
     }
     if(m) xtract_1(f, docblocks)
   });
 
-  if(docblocks.length) return docblocks;
+  if(!docblocks.length) cb("No documentation comments found!");
+  else cb(null, docblocks);
 
   /*    understand/
    * extract all the comments in files in blocks so they can be
@@ -315,6 +354,17 @@ function xtractUserDocz(src, exts) {
   }
 }
 
+/*    way/
+ * create a new markdown or merge the existing markdown then generate the doc from it.
+ */
+function regenerate(ctx, readme, docblocks) {
+  if(readme == null) {
+    saveReadme(ctx, asDiff(docblocks));
+  } else {
+    regen_readme(ctx, readme, docblocks)
+  }
+}
+
 function saveReadme(ctx, diff) {
   const o = []
   for(let i = 0;i < diff.length;i++) {
@@ -335,40 +385,42 @@ function saveReadme(ctx, diff) {
   const data = o.join("\n").trim()
   fs.writeFile(ctx.readme, data, err => {
     if(err) console.error(err)
-    else openDoc(ctx);
+    else docFromMd(ctx);
   })
 }
 
 /*    way/
- * generate and open pdf or html doc
+ * generate and open pdf/html from the markdown
  */
-async function openDoc(ctx) {
+async function docFromMd(ctx) {
   if(!fs.existsSync(ctx.readme)) {
-    console.log(`${ctx.readme} not found to open!`)
+    console.error(`${ctx.readme} not found to open!`)
     return
   }
 
-  const readme = readreadme(ctx)
-  const page_options = readpageoptions(ctx)
+  readreadme(ctx, (err, readme) => {
+    if(err) return console.error(err);
+    readpageoptions(ctx, (err, page_options) => {
+      if(err) return console.error(err);
 
-  let created = false
+      let created = false
 
-  const options = {}
-  if(ctx.html) {
-    options.dest = ctx.html;
-    options.as_html = true;
-  } else {
-    options.dest = ctx.pdf;
-  }
-  if(ctx.style) options.stylesheet = ctx.style
-  if(page_options) {
-    options.pdf_options = page_options
-    options.pdf_options.displayHeaderFooter = true
-  }
-  const mathjax = ctx.mathjax ? path.resolve(ctx.mathjax) : null;
-  if(mathjax) {
-    if(!fs.existsSync(mathjax)) {
-      const mconf = `MathJax = {
+      const options = {}
+      if(ctx.html) {
+        options.dest = ctx.html;
+        options.as_html = true;
+      } else {
+        options.dest = ctx.pdf;
+      }
+      if(ctx.style) options.stylesheet = ctx.style
+      if(page_options) {
+        options.pdf_options = page_options
+        options.pdf_options.displayHeaderFooter = true
+      }
+      const mathjax = ctx.mathjax ? path.resolve(ctx.mathjax) : null;
+      if(mathjax) {
+        if(!fs.existsSync(mathjax)) {
+          const mconf = `MathJax = {
 	tex: {
 		tags: 'ams',
 		inlineMath: [
@@ -376,21 +428,27 @@ async function openDoc(ctx) {
 		],
 	},
 };`
-      fs.writeFileSync(mathjax, mconf)
-      created = true
-    }
-    options.script = [
-      { path: mathjax },
-      { url: "https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" },
-    ]
-  }
+          fs.writeFileSync(mathjax, mconf)
+          created = true
+        }
+        options.script = [
+          { path: mathjax },
+          { url: "https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" },
+        ]
+      }
 
-  await mdToPdf({ path: ctx.readme }, options).catch(console.error)
+      mdToPdf({ path: ctx.readme }, options)
+        .then(() => {
+          if(created) fs.unlinkSync(mathjax)
 
-  if(created) fs.unlinkSync(mathjax)
+          if(ctx.html) openItem(ctx.html);
+          else openItem(ctx.pdf);
+        })
+        .catch(console.error)
 
-  if(ctx.html) openItem(ctx.html);
-  else openItem(ctx.pdf);
+    });
+
+  });
 }
 
 function regen_readme(ctx, readme, docblocks) {
