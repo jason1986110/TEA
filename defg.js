@@ -1,28 +1,26 @@
 #!/usr/bin/env node
-//** # DEFG - Beautiful Documentation from Code Comments
-//**
-//** ## Motivation
+//** # Motivation
 //**
 //** I find that README's and other documentations tend to get out of
 //** date quickly. `defg` generates a README from documentation
 //** comments, and as these comments are close
 //** to the code, they are be easier to access, modify, and update.
 //**
-//** ## How does it work?
+//** # How does it work?
 //**
 //** `defg` trawls through all 'programming' files (.js, .sh, .java, .c, .cpp,...)
 //** it finds and extracts 'special' comments that start with `//**` or `##**`.
 //** These are considered 'user documentation' comments in markdown.
 //** It then uses them to update the README, generate a nice PDF, and opens it.
 //**
-//** ## First Run
+//** # First Run
 //**
 //** If you run `defg` and there is no README.md file, it will generate one from
 //** all the documentation it has found. During this process, it can get the order
 //** of comments all mixed up. You are encouraged to then go and reorder all the
 //** pieces in the README.md to get it into a nice shape.
 //**
-//** ## Improving the README
+//** # Improving the README
 //**
 //** You can also update your README to make it more readable. You can:
 //**
@@ -33,7 +31,7 @@
 //**
 //** As you do all these, `defg` will preserve your changes whenever it updates your README.
 //**
-//** ### HOW TO IMPROVE THE README
+//** ## HOW TO IMPROVE THE README
 //**
 //** - You can add images in markdown or using the `<img..` tag. Similarily,
 //**   you can add other HTML styling in the document to improve it's look.
@@ -53,7 +51,7 @@
 //** - To design the page layout, create a `pages.defg` file. Here you can decide the page
 //**   size, header & footer using the following Puppeteer options: https://pptr.dev/api/puppeteer.pdfoptions
 //**
-//** ## Usage
+//** # Usage
 //**
 //** ```
 //** $> defg
@@ -224,8 +222,11 @@ function readreadme(ctx, cb) {
   function p_r_1(names, data, ndx) {
     if(ndx >= names.length) return cb(null, data);
     const plugin = ctx.plugins[names[ndx]];
-    if(plugin.raw_readme) data = plugin.raw_readme(data);
-    p_r_1(names, data, ndx+1);
+    if(plugin.raw_readme) {
+      plugin.raw_readme(data, data => p_r_1(names, data, ndx+1));
+    } else {
+      p_r_1(names, data, ndx+1);
+    }
   }
 }
 
@@ -296,8 +297,22 @@ function xtractUserDocz(ctx, cb) {
     if(m) xtract_1(f, docblocks)
   });
 
-  if(!docblocks.length) cb("No documentation comments found!");
-  else cb(null, docblocks);
+  if(!docblocks.length) return cb("No documentation comments found!");
+
+  if(!ctx.plugins) return cb(null, docblocks.map(b => b.map(d => d.doc)));
+
+  const names = Object.keys(ctx.plugins);
+  p_d_1(docblocks, 0);
+
+  function p_d_1(docblocks, ndx) {
+    if(ndx >= names.length) return cb(null, docblocks.map(b => b.map(d => d.doc)));
+    const plugin = ctx.plugins[names[ndx]];
+    if(plugin.raw_docblocks) {
+      plugin.raw_docblocks(docblocks, docblocks => p_d_1(docblocks, ndx+1));
+    } else {
+      p_d_1(docblocks, ndx+1);
+    }
+  }
 
   /*    understand/
    * extract all the comments in files in blocks so they can be
@@ -327,31 +342,31 @@ function xtractUserDocz(ctx, cb) {
    * line and creating a new one when needed.
    */
   function xtract_1(f, docblocks) {
-    let active = null
+    let active = null;
 
-    const data = fs.readFileSync(f, "utf8")
-    const lines = data.split(/[\r\n]/g)
+    const data = fs.readFileSync(f, "utf8");
+    const lines = data.split(/[\r\n]/g);
     lines.map(l => {
-      const doc = xtract_doc_comment_1(l)
+      const doc = xtract_doc_comment_1(l);
       if(doc === null) {
-        active = null
+        active = null;
       } else {
         if(!active) {
-          active = []
-          docblocks.push(active)
+          active = [];
+          docblocks.push(active);
         }
-        active.push(doc)
+        active.push({f, doc});
       }
     })
   }
 
   function xtract_doc_comment_1(l) {
-    let m
-    m = l.match(/[/#][/#]\*\* ?$/)
-    if(m) return ""
-    m = l.match(/[/#][/#]\*\* (.*)/)
-    if(m) return m[1]
-    return null
+    let m;
+    m = l.match(/[/#][/#]\*\* ?$/);
+    if(m) return "";
+    m = l.match(/[/#][/#]\*\* (.*)/);
+    if(m) return m[1];
+    return null;
   }
 }
 
