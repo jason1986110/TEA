@@ -214,18 +214,20 @@ function showVersion() {
 function readreadme(ctx, cb) {
   readsafely(ctx.readme, (err, data) => {
     if(err) return cb(err);
-    if(!ctx.plugins) return cb(null, data);
+    if(!data) return cb();
+    const lines = data.split(/[\r\n]/g);
+    if(!ctx.plugins) return cb(null, lines);
     const names = Object.keys(ctx.plugins);
-    p_r_1(names, data, 0);
+    p_r_1(names, lines, 0);
   });
 
-  function p_r_1(names, data, ndx) {
-    if(ndx >= names.length) return cb(null, data);
+  function p_r_1(names, lines, ndx) {
+    if(ndx >= names.length) return cb(null, lines);
     const plugin = ctx.plugins[names[ndx]];
     if(plugin.raw_readme) {
-      plugin.raw_readme(data, data => p_r_1(names, data, ndx+1));
+      plugin.raw_readme(lines, lines => p_r_1(names, lines, ndx+1));
     } else {
-      p_r_1(names, data, ndx+1);
+      p_r_1(names, lines, ndx+1);
     }
   }
 }
@@ -374,7 +376,7 @@ function xtractUserDocz(ctx, cb) {
  * create a new markdown or merge the existing markdown then generate the doc from it.
  */
 function regenerate(ctx, readme, docblocks) {
-  if(readme == null) {
+  if(!readme) {
     saveReadme(ctx, asDiff(docblocks));
   } else {
     regen_readme(ctx, readme, docblocks)

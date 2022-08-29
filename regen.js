@@ -105,8 +105,7 @@
 const logger = require('./logger.js')
 const log = process.env.DEBUG ? logger(console.log.bind(console)) : logger();
 
-function regen(ctx, readme, docblocks) {
-  const rlines = readme.split(/[\r\n]/g);
+function regen(ctx, rlines, docblocks) {
   log("README", rlines.length);
   rlines.map(l => log(l));
   log();
