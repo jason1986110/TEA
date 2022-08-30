@@ -152,7 +152,7 @@ function loadCtx() {
     quick: args['--quick'] || false,
     html: args['--as-html'] || false,
     mathjax: "mathjax-config.js",
-    plugins: args['--plugin'],
+    plugins: args['--plugin'] || ['defg-default-plugin'],
     ignore_src: args['--ignore-src'],
   }
 
