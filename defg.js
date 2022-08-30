@@ -237,9 +237,19 @@ function readreadme(ctx, cb) {
   }
 }
 
+/*    way/
+ * we read the page options from the provided `page.defg` file,
+ * OR the last plugin that returns a `pagedef`.
+ */
 function readpageoptions(ctx, cb) {
   readsafely(ctx.page_options, (err, page_options) => {
     if(err) return cb(err);
+
+    if(!page_options && ctx.plugins) {
+      ctx.plugins.forEach(p => {
+        if(p.plugin.pagedef) page_options = p.plugin.pagedef();
+      });
+    }
 
     if(!page_options) return cb();
 
