@@ -453,7 +453,11 @@ function docFromMd(ctx, readme) {
         options.dest = ctx.pdf;
       }
       if(ctx.css && ctx.css.length) options.css = ctx.css.join("\n");
-      if(ctx.style) options.stylesheet = ctx.style
+      if(ctx.style) {
+        const css = fs.readFileSync(ctx.style);
+        if(options.css) options.css += "\n" + css;
+        else options.css = css;
+      }
       if(page_options) {
         options.pdf_options = page_options
         options.pdf_options.displayHeaderFooter = true
