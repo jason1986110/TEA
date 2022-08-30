@@ -34,6 +34,17 @@ date quickly. `defg` generates a README from documentation
 comments, and as these comments are close
 to the code, they are easier to access, modify, and update.
 
+## First Lines
+
+If you start your documentation with a title, subtitle, and image, the default plugin
+will create a cover page for you.
+```javascript
+//** # Use a Heading as the Title
+//** The next line is a subtitle (optional), followed by a logo
+//** ![logo](./logo.png)
+```
+It will also pull version number, author, and homepage from NodeJS `package.json` files.
+
 ## First Run
 
 If you run `defg` and there is no README.md file, it will generate one from
@@ -41,11 +52,10 @@ all the documentation it has found. During this process, because it has no refer
 it can get the order of comments mixed up. If this happens, you need to reorder
 the README to get it into shape.
 
-<div class="page-break"></div>
-
 ## Improving the Documentation
 
 You can also update your document to make it more readable. You can:
+
 1. Add pictures.
 2. Add styling.
 3. Add text.
@@ -62,16 +72,13 @@ As you do all these, `defg` will preserve your changes whenever it updates your 
 - You can add images in markdown or using the `<img..` tag. You can also
   add other block HTML styling `<div class="..."` in the document to improve it's look.
 - You can add a README.css which will apply the CSS styles while generating the PDF.
-
 - To insert additional text in the README, wrap the additional text
   in a `<div class="insert-block">...</div>`.
-
 - To insert a page break insert a `<div class="page-break" />` and add the style to your CSS:
   ```css
   .page-break {
     page-break-after: always
   }
-
 - To design the page layout, create a `pages.defg` file. Here you can decide the page
   size, header & footer using the following Puppeteer options: https://pptr.dev/api/puppeteer.pdfoptions
 
@@ -98,7 +105,6 @@ Options
    --quick:        use faster (but less accurate) resolution algorithm
    --plugin:       update the documentation or style using this plugin
 ```
-
 
 <div class="insert-block" style="margin-top: 5em">
 For those interested, a technical discussion of `defg` <a href="https://github.com/theproductiveprogrammer/defg/blob/master/ALGO.pdf">can be found here</a>.

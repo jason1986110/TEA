@@ -21,6 +21,19 @@
 //** comments, and as these comments are close
 //** to the code, they are easier to access, modify, and update.
 //**
+//** ## First Lines
+//**
+//** If you start your documentation with a title, subtitle, and image, the default plugin
+//** will create a cover page for you.
+//**
+//** ```javascript
+//** //** # Use a Heading as the Title
+//** //** The next line is a subtitle (optional), followed by a logo
+//** //** ![logo](./logo.png)
+//** ```
+//**
+//** It will also pull version number, author, and homepage from NodeJS `package.json` files.
+//**
 //** ## First Run
 //**
 //** If you run `defg` and there is no README.md file, it will generate one from
