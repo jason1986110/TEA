@@ -80,6 +80,7 @@
 //**    --pdf:          path of output pdf generated (./README.pdf by default)
 //**    --ignore-src:   ignore source and just generate PDF from README.md
 //**    --quick:        use faster (but less accurate) resolution algorithm
+//**    --plugin:       update the documentation or style using this plugin
 //** ```
 const fs = require('fs')
 const path = require('path')
@@ -215,6 +216,7 @@ Options
    --pdf:          path of pdf generated (./README.pdf by default)
    --ignore-src:   ignore source and just generate PDF from README.md
    --quick:        use a faster (but less accurate) resolution algorithm
+   --plugin:       update the documentation or style using this plugin
 `)
 }
 function showVersion() {
