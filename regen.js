@@ -158,7 +158,7 @@ function regen(ctx, rlines, docblocks) {
       log("picking position", i);
 
       const nf = diff.length;
-      const best = { docblock: null, nr: null,  nd: null, dist: null, diff: null }
+      const best = { ndx: null, nr: null,  nd: null, dist: null, diff: null }
       for(let ii = 0;ii < n;ii++) {
         if(best.dist === 0) break;
 
@@ -166,7 +166,6 @@ function regen(ctx, rlines, docblocks) {
 
         log("trying docblock", ii, docblocks[ii], "for position", i);
         ret.push(docblocks[ii]);
-        picked[ii] = true;
 
         let data = [];
         ret.map(block => data = data.concat(block));
@@ -177,7 +176,7 @@ function regen(ctx, rlines, docblocks) {
           log("found best diff");
           best.diff = diff.slice(nf);
           best.diff.map(d => log(d));
-          best.docblock = docblocks[ii];
+          best.ndx = ii;
           best.nr = r.nr;
           best.nd = r.nd;
           best.dist = r.dist;
@@ -187,11 +186,11 @@ function regen(ctx, rlines, docblocks) {
         }
         diff.length = nf;
         ret.pop();
-        picked[ii] = false;
       }
 
-      log("picked docblock", best.docblock, "for position", i);
-      ret.push(best.docblock);
+      log("picked docblock", docblocks[best.ndx], "for position", i);
+      ret.push(docblocks[best.ndx]);
+      picked[best.ndx] = true;
       nr = best.nr;
       nd = best.nd;
       curr_dist = best.dist;
