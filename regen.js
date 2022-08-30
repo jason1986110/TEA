@@ -1,5 +1,10 @@
 'use strict'
 //** # Technical Details
+//** Technical details of `defg`.
+//**
+//** ![techdets](./techdets.png)
+//**
+//** ## Discussion
 //**
 //** We have three fundamental problems we are solving in `defg`:
 //**
