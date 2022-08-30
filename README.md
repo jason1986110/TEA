@@ -3,6 +3,10 @@ Generate beautiful PDF documentation from code
 
 ![logo](./icon.png)
 
+<div class="insert-block">
+You can find this document <a href="https://github.com/theproductiveprogrammer/defg/blob/master/README.pdf">formatted nicely here</a>.
+</div>
+
 ## How it Works
 
 1. Step 1: Write documentation comments in code (`//**` or `##**` comments)
@@ -94,3 +98,8 @@ Options
    --quick:        use faster (but less accurate) resolution algorithm
    --plugin:       update the documentation or style using this plugin
 ```
+
+
+<div class="insert-block">
+A technical discussion of `defg` <a href="https://github.com/theproductiveprogrammer/defg/blob/master/ALGO.pdf">can be found here</a>.
+</div>
