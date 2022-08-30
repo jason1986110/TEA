@@ -1,7 +1,14 @@
 #!/usr/bin/env node
 //** # DEFG
-//** README.md from code documentation comments
+//** Generate beautiful PDF documentation from code
 //**
+//** ## How it Works
+//**
+//** 1. Step 1: Write documentation comments in code (`//**` or `##**` comments)
+//** 2. Step 2: `defg` merges comments into your README/markdown file, updating it.
+//** 3. Step 3: `defg` uses plugins to generate a beautifully formatted PDF.
+//**
+
 //** ## Motivation
 //**
 //** I find that README's and other documentations tend to get out of
