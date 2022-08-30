@@ -26,7 +26,7 @@
   "dependencies": {
     "arg": "^5.0.1",
     "chalk": "^4.1.2",
-    "defg-default-plugin": "^1.0.3",
+    "defg-default-plugin": "^1.0.4",
     "globby": "^13.1.2",
     "md-to-pdf": "^5.1.0"
   }
