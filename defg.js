@@ -228,7 +228,10 @@ function readreadme(ctx, cb) {
     if(ndx >= names.length) return cb(null, lines);
     const plugin = ctx.plugins[names[ndx]];
     if(plugin.raw_readme) {
-      plugin.raw_readme(lines, lines => p_r_1(names, lines, ndx+1));
+      plugin.raw_readme(lines, (err, lines) => {
+        if(err) return cb(err);
+        p_r_1(names, lines, ndx+1)
+      });
     } else {
       p_r_1(names, lines, ndx+1);
     }
