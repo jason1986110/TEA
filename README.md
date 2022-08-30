@@ -1,6 +1,8 @@
-# DEFG - Beautiful Documentation from Code Comments
+# DEFG
+README.md from code documentation comments
 
 ![logo](./icon.png)
+
 
 ## Motivation
 

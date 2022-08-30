@@ -1,26 +1,29 @@
 #!/usr/bin/env node
-//** # Motivation
+//** # DEFG
+//** README.md from code documentation comments
+//**
+//** ## Motivation
 //**
 //** I find that README's and other documentations tend to get out of
 //** date quickly. `defg` generates a README from documentation
 //** comments, and as these comments are close
 //** to the code, they are be easier to access, modify, and update.
 //**
-//** # How does it work?
+//** ## How does it work?
 //**
 //** `defg` trawls through all 'programming' files (.js, .sh, .java, .c, .cpp,...)
 //** it finds and extracts 'special' comments that start with `//**` or `##**`.
 //** These are considered 'user documentation' comments in markdown.
 //** It then uses them to update the README, generate a nice PDF, and opens it.
 //**
-//** # First Run
+//** ## First Run
 //**
 //** If you run `defg` and there is no README.md file, it will generate one from
 //** all the documentation it has found. During this process, it can get the order
 //** of comments all mixed up. You are encouraged to then go and reorder all the
 //** pieces in the README.md to get it into a nice shape.
 //**
-//** # Improving the README
+//** ## Improving the README
 //**
 //** You can also update your README to make it more readable. You can:
 //**
@@ -31,7 +34,7 @@
 //**
 //** As you do all these, `defg` will preserve your changes whenever it updates your README.
 //**
-//** ## HOW TO IMPROVE THE README
+//** ### HOW TO IMPROVE THE README
 //**
 //** - You can add images in markdown or using the `<img..` tag. Similarily,
 //**   you can add other HTML styling in the document to improve it's look.
@@ -51,7 +54,7 @@
 //** - To design the page layout, create a `pages.defg` file. Here you can decide the page
 //**   size, header & footer using the following Puppeteer options: https://pptr.dev/api/puppeteer.pdfoptions
 //**
-//** # Usage
+//** ## Usage
 //**
 //** ```
 //** $> defg
