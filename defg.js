@@ -109,7 +109,7 @@ function main() {
     readreadme(ctx, (err, readme) => {
       if(err) return console.error(err);
       if(ctx.ignore_src) {
-        docFromMd(ctx);
+        docFromMd(ctx, readme);
       } else {
         xtractUserDocz(ctx, (err, docblocks) => {
           if(err) return console.error(err);
@@ -409,21 +409,22 @@ function saveReadme(ctx, diff) {
   const data = o.join("\n").trim()
   fs.writeFile(ctx.readme, data, err => {
     if(err) console.error(err)
-    else docFromMd(ctx);
+    else docFromMd(ctx, o);
   })
 }
 
 /*    way/
  * generate and open pdf/html from the markdown
  */
-async function docFromMd(ctx) {
-  if(!fs.existsSync(ctx.readme)) {
-    console.error(`${ctx.readme} not found to open!`)
+function docFromMd(ctx, readme) {
+  if(!readme) {
+    console.error(`No ${ctx.readme} found!`)
     return
   }
 
-  readreadme(ctx, (err, readme) => {
+  update_readme_plugin(ctx, readme, (err, readme) => {
     if(err) return console.error(err);
+
     readpageoptions(ctx, (err, page_options) => {
       if(err) return console.error(err);
 
@@ -436,6 +437,7 @@ async function docFromMd(ctx) {
       } else {
         options.dest = ctx.pdf;
       }
+      if(ctx.css && ctx.css.length) options.css = ctx.css.join("\n");
       if(ctx.style) options.stylesheet = ctx.style
       if(page_options) {
         options.pdf_options = page_options
@@ -461,7 +463,7 @@ async function docFromMd(ctx) {
         ]
       }
 
-      mdToPdf({ path: ctx.readme }, options)
+      mdToPdf({ content: readme.join("\n").trim() }, options)
         .then(() => {
           if(created) fs.unlinkSync(mathjax)
 
@@ -473,6 +475,30 @@ async function docFromMd(ctx) {
     });
 
   });
+
+}
+
+function update_readme_plugin(ctx, readme, cb) {
+  if(!ctx.plugins) return cb(null, readme);
+  const names = Object.keys(ctx.plugins);
+  u_1(0, readme);
+
+  function u_1(ndx, readme) {
+    if(ndx >= names.length) return cb(null, readme);
+    const plugin = ctx.plugins[names[ndx]];
+    if(plugin.update) {
+      plugin.update(readme, (err, readme, css) => {
+        if(err) return console.error(err);
+        if(css) {
+          if(!ctx.css) ctx.css = [];
+          ctx.css.push(css);
+        }
+        u_1(ndx+1, readme);
+      });
+    } else {
+      u_1(ndx+1, readme);
+    }
+  }
 }
 
 function regen_readme(ctx, readme, docblocks) {
