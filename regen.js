@@ -287,7 +287,7 @@ function regen(ctx, rlines, docblocks) {
         diff.push({ fresh: true, value: lr, dist });
         continue
       }
-      const maxLookAhead = 100;
+      const maxLookAhead = 200;
       let i = 1;
       for(;i < maxLookAhead;i++) {
         const ld_ = data[nd+i]
