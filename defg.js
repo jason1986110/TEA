@@ -28,18 +28,18 @@
 //** it can get the order of comments mixed up. If this happens, you need to reorder
 //** the README to get it into shape.
 //**
-//** ## Improving the README
+//** ## Improving the Documentation
 //**
-//** You can also update your README to make it more readable. You can:
+//** You can also update your document to make it more readable. You can:
 //**
 //** 1. Add pictures.
 //** 2. Add styling.
 //** 3. Add text.
 //** 4. Configure the page layout.
 //**
-//** As you do all these, `defg` will preserve your changes whenever it updates your README.
+//** As you do all these, `defg` will preserve your changes whenever it updates your document.
 //**
-//** ### HOW TO IMPROVE THE README
+//** ### HOW TO IMPROVE THE DOCUMENT
 //**
 //** - You can add images in markdown or using the `<img..` tag. You can also
 //**   add other block HTML styling `<div class="..."` in the document to improve it's look.

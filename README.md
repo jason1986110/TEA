@@ -43,19 +43,19 @@ the README to get it into shape.
 
 <div class="page-break"></div>
 
-## Improving the README
+## Improving the Documentation
 
-You can also update your README to make it more readable. You can:
+You can also update your document to make it more readable. You can:
 1. Add pictures.
 2. Add styling.
 3. Add text.
 4. Configure the page layout.
 
-As you do all these, `defg` will preserve your changes whenever it updates your README.
+As you do all these, `defg` will preserve your changes whenever it updates your document.
 
 <div class="sidenote">
 
-### HOW TO IMPROVE THE README
+### HOW TO IMPROVE THE DOCUMENT
 
 <img style="width:32px;display:block;margin:0 auto" src="./edit.png"></img>
 
@@ -100,6 +100,6 @@ Options
 ```
 
 
-<div class="insert-block">
-A technical discussion of `defg` <a href="https://github.com/theproductiveprogrammer/defg/blob/master/ALGO.pdf">can be found here</a>.
+<div class="insert-block" style="margin-top: 5em">
+For those interested, a technical discussion of `defg` <a href="https://github.com/theproductiveprogrammer/defg/blob/master/ALGO.pdf">can be found here</a>.
 </div>
