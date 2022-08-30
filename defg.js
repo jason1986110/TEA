@@ -168,11 +168,11 @@ function loadCtx() {
 
 function loadPlugins(ctx, cb) {
   if(!ctx.plugins) return cb();
-  const plugins = {}
+  const plugins = []
   for(let i = 0;i < ctx.plugins.length;i++) {
     const p = ctx.plugins[i];
     try {
-      plugins[p] = require(p);
+      plugins.push({ name: p, plugin: require(p) });
     } catch(e) {
       console.error(e)
       return cb(`Failed to load plugin: ${p}`);
@@ -220,20 +220,19 @@ function readreadme(ctx, cb) {
     if(!data) return cb();
     const lines = data.split(/[\r\n]/g);
     if(!ctx.plugins) return cb(null, lines);
-    const names = Object.keys(ctx.plugins);
-    p_r_1(names, lines, 0);
+    p_r_1(lines, 0);
   });
 
-  function p_r_1(names, lines, ndx) {
-    if(ndx >= names.length) return cb(null, lines);
-    const plugin = ctx.plugins[names[ndx]];
+  function p_r_1(lines, ndx) {
+    if(ndx >= ctx.plugins.length) return cb(null, lines);
+    const plugin = ctx.plugins[ndx].plugin;
     if(plugin.raw_readme) {
       plugin.raw_readme(lines, (err, lines) => {
         if(err) return cb(err);
-        p_r_1(names, lines, ndx+1)
+        p_r_1(lines, ndx+1)
       });
     } else {
-      p_r_1(names, lines, ndx+1);
+      p_r_1(lines, ndx+1);
     }
   }
 }
@@ -309,12 +308,11 @@ function xtractUserDocz(ctx, cb) {
 
   if(!ctx.plugins) return cb(null, docblocks.map(b => b.map(d => d.doc)));
 
-  const names = Object.keys(ctx.plugins);
   p_d_1(docblocks, 0);
 
   function p_d_1(docblocks, ndx) {
-    if(ndx >= names.length) return cb(null, docblocks.map(b => b.map(d => d.doc)));
-    const plugin = ctx.plugins[names[ndx]];
+    if(ndx >= ctx.plugins.length) return cb(null, docblocks.map(b => b.map(d => d.doc)));
+    const plugin = ctx.plugins[ndx].plugin;
     if(plugin.raw_docblocks) {
       plugin.raw_docblocks(docblocks, docblocks => p_d_1(docblocks, ndx+1));
     } else {
@@ -480,12 +478,11 @@ function docFromMd(ctx, readme) {
 
 function update_readme_plugin(ctx, readme, cb) {
   if(!ctx.plugins) return cb(null, readme);
-  const names = Object.keys(ctx.plugins);
   u_1(0, readme);
 
   function u_1(ndx, readme) {
-    if(ndx >= names.length) return cb(null, readme);
-    const plugin = ctx.plugins[names[ndx]];
+    if(ndx >= ctx.plugins.length) return cb(null, readme);
+    const plugin = ctx.plugins[ndx].plugin;
     if(plugin.update) {
       plugin.update(readme, (err, readme, css) => {
         if(err) return console.error(err);
