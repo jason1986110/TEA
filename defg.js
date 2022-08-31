@@ -192,8 +192,12 @@ function loadPlugins(ctx, cb) {
     try {
       plugins.push({ name: p, plugin: require(p) });
     } catch(e) {
-      console.error(e)
-      return cb(`Failed to load plugin: ${p}`);
+      try {
+      plugins.push({ name: p, plugin: path.join(process.cwd(), p) });
+      } catch(e) {
+        console.error(e)
+        return cb(`Failed to load plugin: ${p}`);
+      }
     }
   }
   return cb(null, plugins);
