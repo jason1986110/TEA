@@ -1,6 +1,6 @@
 {
   "name": "defg",
-  "version": "1.7.9",
+  "version": "1.7.10",
   "description": "Generate beautiful PDF documentation from code",
   "bin": {
     "defg": "./defg.js"
