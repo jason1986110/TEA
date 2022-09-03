@@ -74,9 +74,9 @@
 //** ## Usage
 //**
 //** ```
-//** $> defg
-//**   # ensures README contains all 'user documentation' comments (//** or ##** comments)
-//**   # and then generates and opens a PDF with the user documentation
+//** $> defg -h
+//**   # Generates beautiful PDF documentation from documentation comments
+//**   # (Comments starting with //** or ##**)
 //**
 //** Options
 //**    -h, --help:     show help
@@ -217,8 +217,8 @@ function asDiff(docblocks) {
 
 function showHelp() {
   console.log(`$> defg
-  # ensures README contains all 'user documentation' comments (${"//"}** or ${"##"}** comments)
-  # and then generates and opens a PDF with the user documentation
+  # Generates beautiful PDF documentation from documentation comments
+  # (Comments starting with ${"//"}** or ${"##"}**)
 
 Options
    -h, --help:     show help

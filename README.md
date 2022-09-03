@@ -25,6 +25,26 @@ Below is a schematic of how this works:
 ![schematic](./schematic.png)
 
 
+## Installation & Use
+
+`defg` is a npm script and can be installed globally using:
+
+```sh
+$> npm install -g defg
+```
+
+Then enter the directory where your README.md is present, and run
+
+```sh
+$> defg
+```
+
+You can get help using:
+
+```sh
+$> defg -h
+```
+
 </div>
 
 ## Motivation
@@ -63,6 +83,8 @@ You can also update your document to make it more readable. You can:
 
 As you do all these, `defg` will preserve your changes whenever it updates your document.
 
+<div class="page-break"></div>
+
 <div class="sidenote">
 
 ### HOW TO IMPROVE THE DOCUMENT
@@ -88,9 +110,9 @@ As you do all these, `defg` will preserve your changes whenever it updates your 
 
 ## Usage
 ```
-$> defg
-  # ensures README contains all 'user documentation' comments (//** or ##** comments)
-  # and then generates and opens a PDF with the user documentation
+$> defg -h
+  # Generates beautiful PDF documentation from documentation comments
+  # (Comments starting with //** or ##**)
 Options
    -h, --help:     show help
    -v, --version:  show version
