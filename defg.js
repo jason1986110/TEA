@@ -121,6 +121,8 @@ const regen = require('./regen.js')
 function main() {
   const ctx = loadCtx();
 
+  if(!ctx) return;
+
   loadPlugins(ctx, (err, plugins) => {
     if(err) return console.error(err);
     ctx.plugins = plugins;
