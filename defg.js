@@ -381,24 +381,46 @@ function xtractUserDocz(ctx, cb) {
    * Add each documentation line to an active docblock list, closing the
    * existing active list whenever we find a non-documentation
    * line and creating a new one when needed.
+   *
+   *    problem/
+   * people sometimes find it easier to use (fully) blank lines as spacing instead
+   * of using a blank doc comment. These should not be treated as separate docblocks
+   *    way/
+   * treat a couple (upto 3) blank lines as part of the same docblock.
    */
   function xtract_1(f, docblocks) {
     let active = null;
+    let blank = 0;
 
     const data = fs.readFileSync(f, "utf8");
     const lines = data.split(/[\r\n]/g);
     lines.map(l => {
       const doc = xtract_doc_comment_1(l);
       if(doc === null) {
-        active = null;
-      } else {
-        if(!active) {
-          active = [];
-          docblocks.push(active);
+        const m = l.match(/^[ \t]*$/);
+        if(m) {
+          blank++;
+          if(blank > 3) {
+            active = null;
+          } else {
+            add_db_1("");
+          }
+        } else {
+          blank = 0;
+          active = null;
         }
-        active.push({f, doc});
+      } else {
+        add_db_1(doc);
       }
     })
+
+    function add_db_1(doc) {
+      if(!active) {
+        active = [];
+        docblocks.push(active);
+      }
+      active.push({f, doc});
+    }
   }
 
   function xtract_doc_comment_1(l) {
