@@ -397,14 +397,8 @@ function xtractUserDocz(ctx, cb) {
     lines.map(l => {
       const doc = xtract_doc_comment_1(l);
       if(doc === null) {
-        const m = l.match(/^[ \t]*$/);
-        if(active && m) {
+        if(active && l.match(/^[ \t]*$/)) {
           blank++;
-          if(blank > 3) {
-            active = null;
-          } else {
-            add_db_1("");
-          }
         } else {
           blank = 0;
           active = null;
@@ -418,6 +412,9 @@ function xtractUserDocz(ctx, cb) {
       if(!active) {
         active = [];
         docblocks.push(active);
+      } else {
+        if(blank && blank < 3) for(let i = 0;i < blank;i++) active.push({f, doc:""});
+        blank = 0;
       }
       active.push({f, doc});
     }
