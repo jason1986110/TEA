@@ -398,7 +398,7 @@ function xtractUserDocz(ctx, cb) {
       const doc = xtract_doc_comment_1(l);
       if(doc === null) {
         const m = l.match(/^[ \t]*$/);
-        if(m) {
+        if(active && m) {
           blank++;
           if(blank > 3) {
             active = null;
