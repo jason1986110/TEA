@@ -131,7 +131,7 @@ function regen(ctx, rlines, docblocks) {
 
   if(ctx.quick) {
     log("minimum diff found");
-    min.diff.map(d => log(d));
+    diff.map(d => log(d));
     return diff;
   } else {
 
